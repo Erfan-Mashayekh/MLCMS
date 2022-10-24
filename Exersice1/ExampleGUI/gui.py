@@ -1,7 +1,8 @@
 import sys
 import tkinter
 from tkinter import Button, Canvas, Menu
-from scenario_elements import Scenario, Pedestrian
+from scenario import Scenario
+from pedestrian import Pedestrian
 
 
 class MainGUI():
@@ -18,7 +19,9 @@ class MainGUI():
         print('restart not implemented yet')
 
 
-    def step_scenario(self, scenario, canvas, canvas_image):
+    def step_scenario(self, scenario : Scenario,
+                            canvas : Canvas,
+                            canvas_image) -> None:
         """
         Moves the simulation forward by one step, and visualizes the result.
 
