@@ -2,6 +2,9 @@ import numpy as np
 from PIL import Image, ImageTk
 import scipy.spatial.distance
 
+from typing import List
+from pedestrian import Pedestrian
+
 
 class Scenario:
     """
@@ -18,7 +21,8 @@ class Scenario:
         'EMPTY': (255, 255, 255),
         'PEDESTRIAN': (255, 0, 0),
         'TARGET': (0, 0, 255),
-        'OBSTACLE': (255, 0, 255)
+        'OBSTACLE': (255, 0, 255),
+        'PATH' : (255, 200, 200)
     }
     NAME2ID = {
         ID2NAME[0]: 0,
@@ -37,6 +41,7 @@ class Scenario:
         self.height = height
         self.grid_image = None
         self.grid = np.zeros((width, height))
+        self.pedestrians : List[Pedestrian]
         self.pedestrians = []
         self.target_distance_grids = self.recompute_target_distances()
 
@@ -120,6 +125,8 @@ class Scenario:
         for pedestrian in self.pedestrians:
             x, y = pedestrian.position
             pix[x, y] = Scenario.NAME2COLOR['PEDESTRIAN']
+            for [x, y] in pedestrian.path:
+                pix[x, y] = Scenario.NAME2COLOR['PATH']
         im = im.resize(Scenario.GRID_SIZE, Image.NONE)
         self.grid_image = ImageTk.PhotoImage(im)
         canvas.itemconfigure(old_image_id, image=self.grid_image)

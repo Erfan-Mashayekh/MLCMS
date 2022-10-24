@@ -1,5 +1,4 @@
 import numpy as np
-from scenario import Scenario
 
 
 class Pedestrian:
@@ -10,6 +9,7 @@ class Pedestrian:
     def __init__(self, position, desired_speed):
         self._position = position
         self._desired_speed = desired_speed
+        self._path = []
 
     @property
     def position(self):
@@ -19,7 +19,11 @@ class Pedestrian:
     def desired_speed(self):
         return self._desired_speed
 
-    def get_neighbors(self, scenario : Scenario):
+    @property
+    def path(self):
+        return self._path
+
+    def get_neighbors(self, scenario):
         """
         Compute all neighbors in a 9 cell neighborhood of the current position.
         :param scenario: The scenario instance.
@@ -34,7 +38,7 @@ class Pedestrian:
                     and np.abs(x) + np.abs(y) > 0
         ]
 
-    def update_step(self, scenario : Scenario):
+    def update_step(self, scenario):
         """
         Moves to the cell with the lowest distance to the target.
         This does not take obstacles or other pedestrians into account.
@@ -42,6 +46,7 @@ class Pedestrian:
 
         :param scenario: The current scenario instance.
         """
+        self._path.append(self._position)
         neighbors = self.get_neighbors(scenario)
         next_cell_distance = scenario.target_distance_grids[self._position[0]][self._position[1]]
         next_pos = self._position
