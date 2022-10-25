@@ -1,9 +1,10 @@
 {
-  "shape": [50, 50],
+  "shape": [200, 200],
   "pedestrians" : [
      [[5, 25], 1]
   ],
   "targets" : [
     [25, 25]
-  ]
+  ],
+  "obstacles": []
 }
