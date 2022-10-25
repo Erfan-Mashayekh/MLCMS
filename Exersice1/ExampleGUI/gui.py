@@ -1,5 +1,6 @@
 import sys
 import tkinter
+import json
 from tkinter import Button, Canvas, Menu
 from scenario import Scenario
 from pedestrian import Pedestrian
@@ -33,6 +34,29 @@ class MainGUI():
         scenario.update_step()
         scenario.to_image(canvas, canvas_image)
 
+    def load_scenario(self, path) -> Scenario:
+        """
+        Load a scenario that is specified in a JSON file
+        TODO: missing obstacles read in
+        Args:
+            path: path to JSON file of scenario
+
+        Returns:
+            Scenario: the scenario specified by the JSON file
+        """
+        with open(path, 'r') as f:
+            scenario_dict = json.load(f)
+        x, y = scenario_dict['shape']
+        sc = Scenario(x, y)
+        for pos in scenario_dict['targets']:
+            x, y = pos
+            sc.grid[x, y] = Scenario.NAME2ID['TARGET']
+        sc.recompute_target_distances()
+        for pedestrian in scenario_dict['pedestrians']:
+            pos, speed = pedestrian
+            x, y = pos
+            sc.pedestrians.append(Pedestrian((x, y), speed))
+        return sc
 
     def exit_gui(self, ):
         """
@@ -64,7 +88,8 @@ class MainGUI():
         canvas_image = canvas.create_image(5, 50, image=None, anchor=tkinter.NW)
         canvas.pack()
 
-        sc = self._create_default_scenario()
+        # sc = self._create_default_scenario()
+        sc = self.load_scenario("/home/ese/Courses/MLCMS/MLCMS/Exersice1/scenarios/sc0.json")
 
         # can be used to show pedestrians and targets
         sc.to_image(canvas, canvas_image)
