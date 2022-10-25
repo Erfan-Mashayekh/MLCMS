@@ -37,6 +37,7 @@ class MainGUI():
     def load_scenario(self, path) -> Scenario:
         """
         Load a scenario that is specified in a JSON file
+        TODO: missing obstacles read in
         Args:
             path: path to JSON file of scenario
 
@@ -47,7 +48,7 @@ class MainGUI():
             scenario_dict = json.load(f)
         x, y = scenario_dict['shape']
         sc = Scenario(x, y)
-        for pos in scenario_dict['obstacle']:
+        for pos in scenario_dict['obstacles']:
             x, y = pos
             sc.grid[x, y] = Scenario.NAME2ID['OBSTACLE']
         for pos in scenario_dict['targets']:
@@ -67,7 +68,7 @@ class MainGUI():
         sys.exit()
 
 
-    def start_gui(self, ):
+    def start_gui(self, path):
         """
         Creates and shows a simple user interface with a menu and multiple buttons.
         Only one button works at the moment: "step simulation".
@@ -91,7 +92,7 @@ class MainGUI():
         canvas.pack()
 
         # sc = self._create_default_scenario()
-        sc = self.load_scenario("/home/ese/Courses/MLCMS/MLCMS/Exersice1/scenarios/sc0.json")
+        sc = self.load_scenario(path)
 
         # can be used to show pedestrians and targets
         sc.to_image(canvas, canvas_image)
