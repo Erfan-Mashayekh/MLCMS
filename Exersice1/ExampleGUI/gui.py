@@ -37,7 +37,6 @@ class MainGUI():
     def load_scenario(self, path) -> Scenario:
         """
         Load a scenario that is specified in a JSON file
-        TODO: missing obstacles read in
         Args:
             path: path to JSON file of scenario
 
@@ -48,6 +47,9 @@ class MainGUI():
             scenario_dict = json.load(f)
         x, y = scenario_dict['shape']
         sc = Scenario(x, y)
+        for pos in scenario_dict['obstacle']:
+            x, y = pos
+            sc.grid[x, y] = Scenario.NAME2ID['OBSTACLE']
         for pos in scenario_dict['targets']:
             x, y = pos
             sc.grid[x, y] = Scenario.NAME2ID['TARGET']
