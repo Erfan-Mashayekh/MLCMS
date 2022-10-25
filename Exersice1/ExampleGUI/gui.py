@@ -45,7 +45,8 @@ class MainGUI():
         """
         Creates and shows a simple user interface with a menu and multiple buttons.
         Only one button works at the moment: "step simulation".
-        Also creates a rudimentary, fixed Scenario instance with three Pedestrian instances and multiple targets.
+        Also creates a rudimentary, fixed Scenario instance with
+        three Pedestrian instances and multiple targets.
         """
         win = tkinter.Tk()
         win.geometry('500x500')  # setting the size of the window
@@ -63,18 +64,7 @@ class MainGUI():
         canvas_image = canvas.create_image(5, 50, image=None, anchor=tkinter.NW)
         canvas.pack()
 
-        sc = Scenario(100, 100)
-
-        sc.grid[23, 25] = Scenario.NAME2ID['TARGET']
-        sc.grid[23, 45] = Scenario.NAME2ID['TARGET']
-        sc.grid[43, 55] = Scenario.NAME2ID['TARGET']
-        sc.recompute_target_distances()
-
-        sc.pedestrians = [
-            Pedestrian((31, 2), 2.3),
-            Pedestrian((1, 10), 2.1),
-            Pedestrian((80, 70), 2.1)
-        ]
+        sc = self._create_default_scenario()
 
         # can be used to show pedestrians and targets
         sc.to_image(canvas, canvas_image)
@@ -90,3 +80,26 @@ class MainGUI():
         btn.place(x=380, y=10)
 
         win.mainloop()
+
+    # private:
+    def _create_default_scenario(self, ) -> Scenario:
+        """
+        Creates a fixed default Scenario instance with
+        three Pedestrian instances and multiple targets.
+
+        Returns:
+            Scenario: the default scenario
+        """
+        sc = Scenario(100, 100)
+
+        sc.grid[23, 25] = Scenario.NAME2ID['TARGET']
+        sc.grid[23, 45] = Scenario.NAME2ID['TARGET']
+        sc.grid[43, 55] = Scenario.NAME2ID['TARGET']
+        sc.recompute_target_distances()
+
+        sc.pedestrians = [
+            Pedestrian((31, 2), 2.3),
+            Pedestrian((1, 10), 2.1),
+            Pedestrian((80, 70), 2.1)
+        ]
+        return sc
