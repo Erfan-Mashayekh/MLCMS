@@ -1,8 +1,9 @@
 {
   "shape": [200, 200],
-  "Pedestrians" : [
+  "pedestrians" : [
      [[5, 25], 1]
   ],
-  "Targets" : [
+  "targets" : [
     [25, 25]
+  ]
 }
