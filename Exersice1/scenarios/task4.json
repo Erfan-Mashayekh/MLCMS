@@ -1,12 +1,12 @@
 {
   "shape": [200, 200],
-  "Pedestrians" : [
+  "pedestrians" : [
      [[10, 25], 1]
   ],
-  "Targets": [
+  "targets": [
     [25, 25]
   ],
-  "Obstacle": [
+  "obstacle": [
     [15, 20],
     [16, 20],
     [17, 20],
