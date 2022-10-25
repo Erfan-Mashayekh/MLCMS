@@ -49,6 +49,9 @@ class MainGUI():
             scenario_dict = json.load(f)
         x, y = scenario_dict['shape']
         sc = Scenario(x, y)
+        for pos in scenario_dict['obstacles']:
+            x, y = pos
+            sc.grid[x, y] = Scenario.NAME2ID['OBSTACLE']
         for pos in scenario_dict['targets']:
             x, y = pos
             sc.grid[x, y] = Scenario.NAME2ID['TARGET']
@@ -68,7 +71,7 @@ class MainGUI():
         sys.exit()
 
 
-    def start_gui(self, ):
+    def start_gui(self, path):
         """
         Creates and shows a simple user interface with a menu and multiple buttons.
         Only one button works at the moment: "step simulation".
@@ -92,7 +95,12 @@ class MainGUI():
         file_menu.add_command(label='Restart', command=self.restart_scenario)
         file_menu.add_command(label='Close', command=self.exit_gui)
 
-        self._create_default_scenario()
+        canvas = Canvas(win, width=Scenario.GRID_SIZE[0], height=Scenario.GRID_SIZE[1])  # creating the canvas
+        canvas_image = canvas.create_image(5, 50, image=None, anchor=tkinter.NW)
+        canvas.pack()
+
+        # sc = self._create_default_scenario()
+        sc = self.load_scenario(path)
 
         # can be used to show pedestrians and targets
         self.scenario.to_image(canvas, canvas_image)
