@@ -48,7 +48,6 @@ class MainGUI():
         with open(path, 'r') as f:
             scenario_dict = json.load(f)
         x, y = scenario_dict['shape']
-        Scenario.GRID_SIZE = (x, y) #change the size of Scenario
         sc = Scenario(x, y)
         for pos in scenario_dict['targets']:
             x, y = pos
