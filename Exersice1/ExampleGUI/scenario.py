@@ -21,7 +21,7 @@ class Scenario:
         'EMPTY': (255, 255, 255),
         'PEDESTRIAN': (255, 0, 0),
         'TARGET': (0, 0, 255),
-        'OBSTACLE': (255, 0, 255),
+        'OBSTACLE': (0, 255, 0),
         'PATH' : (255, 200, 200)
     }
     NAME2ID = {

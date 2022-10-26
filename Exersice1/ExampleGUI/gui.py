@@ -52,6 +52,9 @@ class MainGUI():
         for pos in scenario_dict['targets']:
             x, y = pos
             sc.grid[x, y] = Scenario.NAME2ID['TARGET']
+        for pos in scenario_dict['obstacles']:
+            x, y = pos
+            sc.grid[x, y] = Scenario.NAME2ID['OBSTACLE']
         sc.recompute_target_distances()
         for pedestrian in scenario_dict['pedestrians']:
             pos, speed = pedestrian
