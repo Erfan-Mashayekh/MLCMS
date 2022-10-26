@@ -1,4 +1,5 @@
 import sys
+import os
 import tkinter
 import json
 from tkinter import Button, Canvas, Menu, filedialog
@@ -11,13 +12,28 @@ class MainGUI():
     Defines a simple graphical user interface.
     To start, use the `start_gui` method.
     """
+    # find path where this file is in
+    _PATH = os.path.dirname(os.path.realpath(__file__))
 
     def create_scenario(self, ):
+        # TODO:
         print('create not implemented yet')
 
 
     def restart_scenario(self, ):
-        print('restart not implemented yet')
+        """restarts the scenario
+
+        Raises:
+            ValueError: if self.restart_dict contains invalid values
+        """
+        match self.restart_dict['type']:
+            case 'load':
+                self.load_scenario(*self.restart_dict['args'])
+            case 'create':
+                # TODO:
+                print('create not implemented yet')
+            case _ :
+                raise ValueError('Could not match type of restart scenario')
 
 
     def step_scenario(self, canvas : Canvas,
@@ -34,17 +50,22 @@ class MainGUI():
         self.scenario.to_image(canvas, canvas_image)
 
     def load_scenario(self, canvas : Canvas,
-                            canvas_image):
+                            canvas_image,
+                            path : str = None):
         """
         Load a scenario that is specified in a JSON file
-        TODO: missing obstacles read in
+
         Args:
             path: path to JSON file of scenario
 
         Returns:
             Scenario: the scenario specified by the JSON file
         """
-        path = filedialog.askopenfilename(initialdir="./scenarios")
+        if path == None:
+            initialdir = os.path.abspath(
+                                os.path.join(self._PATH, "../scenarios")
+                            )
+            path = filedialog.askopenfilename(initialdir=initialdir)
         with open(path, 'r') as f:
             scenario_dict = json.load(f)
         x, y = scenario_dict['shape']
@@ -62,6 +83,8 @@ class MainGUI():
             sc.pedestrians.append(Pedestrian((x, y), speed))
         self.scenario = sc
         self.scenario.to_image(canvas, canvas_image)
+        self.restart_dict = {'type': 'load',
+                             'args': (canvas, canvas_image, path)}
 
 
     def exit_gui(self, ):
@@ -95,10 +118,11 @@ class MainGUI():
         file_menu.add_command(label='Restart', command=self.restart_scenario)
         file_menu.add_command(label='Close', command=self.exit_gui)
 
-        self._create_default_scenario()
 
-        # can be used to show pedestrians and targets
-        self.scenario.to_image(canvas, canvas_image)
+        path = os.path.abspath(
+                        os.path.join(self._PATH, "../scenarios/default.json")
+                    )
+        self.load_scenario(canvas, canvas_image, path)
 
         # can be used to show the target grid instead
         # sc.target_grid_to_image(canvas, canvas_image)
@@ -112,25 +136,3 @@ class MainGUI():
 
         win.mainloop()
 
-    # private:
-    def _create_default_scenario(self, ):
-        """
-        Creates a fixed default Scenario instance with
-        three Pedestrian instances and multiple targets.
-
-        Returns:
-            Scenario: the default scenario
-        """
-        sc = Scenario(100, 100)
-
-        sc.grid[23, 25] = Scenario.NAME2ID['TARGET']
-        sc.grid[23, 45] = Scenario.NAME2ID['TARGET']
-        sc.grid[43, 55] = Scenario.NAME2ID['TARGET']
-        sc.recompute_target_distances()
-
-        sc.pedestrians = [
-            Pedestrian((31, 2), 2.3),
-            Pedestrian((1, 10), 2.1),
-            Pedestrian((80, 70), 2.1)
-        ]
-        self.scenario = sc

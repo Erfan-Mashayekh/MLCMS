@@ -30,6 +30,7 @@ class Scenario:
         ID2NAME[2]: 2,
         ID2NAME[3]: 3
     }
+    distance_mode = 0
 
     def __init__(self, width, height):
         if width < 1 or width > 1024:
@@ -46,8 +47,20 @@ class Scenario:
         self.target_distance_grids = self.recompute_target_distances()
 
     def recompute_target_distances(self):
+        match self.distance_mode:
+            case 0:
+                self.recompute_euclidean_distances()
+            case 1:
+                self.recompute_walking_distances()
+            case _:
+                raise ValueError('invalid distance_mode')
+
+    def recompute_euclidean_distances(self):
         self.target_distance_grids = self.update_target_grid()
         return self.target_distance_grids
+
+    def recompute_walking_distances(self):
+        pass
 
     def update_target_grid(self):
         """
