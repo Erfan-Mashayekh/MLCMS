@@ -73,6 +73,7 @@ class MainGUI():
         for pos in scenario_dict['targets']:
             x, y = pos
             sc.grid[x, y] = Scenario.NAME2ID['TARGET']
+            sc.targets.append([x, y])
         for pos in scenario_dict['obstacles']:
             x, y = pos
             sc.grid[x, y] = Scenario.NAME2ID['OBSTACLE']
@@ -93,6 +94,8 @@ class MainGUI():
         """
         sys.exit()
 
+    def show_target_distance_map(self, canvas, canvas_image):
+        self.scenario.target_grid_to_image(canvas, canvas_image)
 
     def start_gui(self, ):
         """
@@ -114,7 +117,8 @@ class MainGUI():
         file_menu = Menu(menu)
         menu.add_cascade(label='Simulation', menu=file_menu)
         file_menu.add_command(label='New', command=self.create_scenario)
-        file_menu.add_command(label='Load Scenario', command=lambda: self.load_scenario(canvas, canvas_image))
+        file_menu.add_command(label='Load Scenario',
+                              command=lambda: self.load_scenario(canvas, canvas_image))
         file_menu.add_command(label='Restart', command=self.restart_scenario)
         file_menu.add_command(label='Close', command=self.exit_gui)
 
@@ -124,14 +128,14 @@ class MainGUI():
                     )
         self.load_scenario(canvas, canvas_image, path)
 
-        # can be used to show the target grid instead
-        # sc.target_grid_to_image(canvas, canvas_image)
-
-        btn = Button(win, text='Step simulation', command=lambda: self.step_scenario(canvas, canvas_image))
+        btn = Button(win, text='Step simulation',
+                     command=lambda: self.step_scenario(canvas, canvas_image))
         btn.place(x=20, y=10)
-        btn = Button(win, text='Restart simulation', command=self.restart_scenario)
+        btn = Button(win, text='Restart simulation',
+                     command=self.restart_scenario)
         btn.place(x=200, y=10)
-        btn = Button(win, text='Create simulation', command=self.create_scenario)
+        btn = Button(win, text='Show Distance',
+                     command=lambda: self.show_target_distance_map(canvas, canvas_image))
         btn.place(x=380, y=10)
 
         win.mainloop()

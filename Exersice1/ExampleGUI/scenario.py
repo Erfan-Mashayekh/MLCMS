@@ -1,6 +1,9 @@
+from turtle import onscreenclick
 import numpy as np
 from PIL import Image, ImageTk
 import scipy.spatial.distance
+import networkx as nx
+from math import sqrt
 
 from typing import List
 from pedestrian import Pedestrian
@@ -30,7 +33,7 @@ class Scenario:
         ID2NAME[2]: 2,
         ID2NAME[3]: 3
     }
-    distance_mode = 0
+    distance_mode = 1
 
     def __init__(self, width, height):
         if width < 1 or width > 1024:
@@ -44,35 +47,102 @@ class Scenario:
         self.grid = np.zeros((width, height))
         self.pedestrians : List[Pedestrian]
         self.pedestrians = []
-        self.target_distance_grids = self.recompute_target_distances()
+        self.targets = []
+        self.target_distance_grids = np.zeros((self.width, self.height))
 
     def recompute_target_distances(self):
+        """
+        computes the grid of distances to the nearest target.
+        The path-finding algorithm that is used depends on self.distance_mode
+
+        Raises:
+            ValueError: if self.distance_mode is invalid
+        """
         match self.distance_mode:
             case 0:
-                self.recompute_euclidean_distances()
+                self._compute_euclidean_distances()
             case 1:
-                self.recompute_walking_distances()
+                self._compute_walking_distances()
             case _:
                 raise ValueError('invalid distance_mode')
 
-    def recompute_euclidean_distances(self):
-        self.target_distance_grids = self.update_target_grid()
-        return self.target_distance_grids
 
-    def recompute_walking_distances(self):
-        pass
+    def _compute_walking_distances(self) -> None:
+        """
+        Computes walking distance, along "cell directions".
+        The distance calculation account for obstacles.
 
-    def update_target_grid(self):
+        Writes the distance for every grid cell, as a np.ndarray to
+        self.target_distance_grids
+        """
+        G = self._build_graph()
+        sources = [j * self.width + i for [i, j] in self.targets]
+        distance = nx.multi_source_dijkstra_path_length(G, sources)
+        distance_grids = np.full((self.width, self.height), np.inf)
+
+        for i in range(self.width):
+            for j in range(self.height):
+                if self._is_obstacle(i, j):
+                    continue
+                id = self.width * j + i # compute node id
+                distance_grids[i,j] = distance[id]
+        self.target_distance_grids = distance_grids
+
+
+    def _is_obstacle(self, i : int, j : int) -> bool:
+        """
+        Convenience function to check grid position for obstacles.
+
+        Args:
+            i (int): horizontal position
+            j (int): vertical position
+
+        Returns:
+            bool: true if there is an obstacle at the specified position
+        """
+        return self.grid[i, j] == self.NAME2ID['OBSTACLE']
+
+
+    def _build_graph(self) -> nx.Graph:
+        """
+        builds graph used in dijkstra algorithm from given scenario grid
+
+        Returns:
+            nx.Graph: graph containing all non-obstacle cells
+        """
+        G = nx.Graph()
+        G.add_nodes_from(range(self.width*self.height))
+
+        obstacle_ids = []
+        for i in range(self.width):
+            for j in range(self.height):
+                id = self.width * j + i # compute node id
+                if self._is_obstacle(i, j):
+                    obstacle_ids.append(id)
+                    continue
+                if i + 1 < self.width:
+                    G.add_edge(id, id + 1, weight=1)
+                    if j + 1 < self.height:
+                        G.add_edge(id, id + 1 + self.width, weight=sqrt(2))
+                if j + 1 < self.height:
+                    G.add_edge(id, id + self.width, weight=1)
+                    if i - 1 > -1:
+                        G.add_edge(id, id - 1 + self.width, weight=sqrt(2))
+        G.remove_nodes_from(obstacle_ids)
+        return G
+
+
+    def _compute_euclidean_distances(self) -> None:
         """
         Computes the shortest distance from every grid point to the nearest target cell.
         This does not take obstacles into account.
-        :returns: The distance for every grid cell, as a np.ndarray.
+
+        Writes the distance for every grid cell, as a np.ndarray to
+        self.target_distance_grids
         """
         targets = []
-        for x in range(self.width):
-            for y in range(self.height):
-                if self.grid[x, y] == Scenario.NAME2ID['TARGET']:
-                    targets.append([y, x])  # y and x are flipped because they are in image space.
+        for [x, y] in self.targets:
+            targets.append([y, x]) # y and x are flipped because they are in image space.
         if len(targets) == 0:
             return np.zeros((self.width, self.height))
 
@@ -89,7 +159,7 @@ class Scenario:
         # now, compute the minimum over all distances to all targets.
         distances = np.min(distances, axis=0)
 
-        return distances.reshape((self.width, self.height))
+        self.target_distance_grids = distances.reshape((self.width, self.height))
 
     def update_step(self):
         """
@@ -116,6 +186,9 @@ class Scenario:
         for x in range(self.width):
             for y in range(self.height):
                 target_distance = self.target_distance_grids[x][y]
+                if self._is_obstacle(x, y):
+                    pix[x, y] = (255, 255, 255)
+                    continue
                 pix[x, y] = (max(0, min(255, int(10 * target_distance) - 0 * 255)),
                              max(0, min(255, int(10 * target_distance) - 1 * 255)),
                              max(0, min(255, int(10 * target_distance) - 2 * 255)))
