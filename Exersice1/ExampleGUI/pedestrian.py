@@ -10,6 +10,9 @@ class Pedestrian:
         self._position = position
         self._desired_speed = desired_speed
         self._path = []
+        self._entire_distance = 0
+        self._step = 0
+
 
     @property
     def position(self):
@@ -58,9 +61,15 @@ class Pedestrian:
         neighbors = self.get_neighbors(scenario)
         next_cell_distance = scenario.target_distance_grids[self._position[0]][self._position[1]]
         next_pos = self._position
-        # Search for optimal step
-        for (n_x, n_y) in neighbors:
-            if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
-                next_pos = (n_x, n_y)
-                next_cell_distance = scenario.target_distance_grids[n_x, n_y]
-        self._position = next_pos
+        desired_traversed_distance = self._desired_speed * self._step
+        traversed_distance = abs(self._entire_distance - next_cell_distance)
+        if desired_traversed_distance < traversed_distance: 
+            pass
+        else:
+            # Search for optimal step
+            for (n_x, n_y) in neighbors:
+                if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
+                    next_pos = (n_x, n_y)
+                    next_cell_distance = scenario.target_distance_grids[n_x, n_y]
+            self._position = next_pos
+        self._step = self._step + 1
