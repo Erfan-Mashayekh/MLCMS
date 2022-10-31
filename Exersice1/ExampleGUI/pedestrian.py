@@ -23,6 +23,14 @@ class Pedestrian:
     def path(self):
         return self._path
 
+    @property
+    def entire_distance(self):
+        return self._entire_distance
+
+    @entire_distance.setter
+    def entire_distance(self, entire_distance):
+        self._entire_distance = entire_distance
+
     def get_neighbors(self, scenario):
         """
         Compute all neighbors in a 9 cell neighborhood of the current position.
