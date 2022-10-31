@@ -161,6 +161,15 @@ class Scenario:
 
         self.target_distance_grids = distances.reshape((self.width, self.height))
 
+    def entire_distance_init(self):
+        """
+        Computes and stores the distance of each pedestrian to the nearest 
+        target before moving.
+        This value is used as a constant for speed control in update step.
+        """
+        for pedestrian in self.pedestrians:
+            pedestrian.entire_distance = self.target_distance_grids[pedestrian.position[0], pedestrian.position[1]]
+
     def update_step(self):
         """
         Updates the position of all pedestrians.
