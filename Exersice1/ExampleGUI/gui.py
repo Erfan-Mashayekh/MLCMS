@@ -82,6 +82,7 @@ class MainGUI():
             pos, speed = pedestrian
             x, y = pos
             sc.pedestrians.append(Pedestrian((x, y), speed))
+        sc.entire_distance_init()
         self.scenario = sc
         self.scenario.to_image(canvas, canvas_image)
         self.restart_dict = {'type': 'load',
