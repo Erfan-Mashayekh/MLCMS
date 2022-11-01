@@ -57,19 +57,25 @@ class Pedestrian:
 
         :param scenario: The current scenario instance.
         """
-        self._path.append(self._position)
-        neighbors = self.get_neighbors(scenario)
-        next_cell_distance = scenario.target_distance_grids[self._position[0]][self._position[1]]
-        next_pos = self._position
         desired_traversed_distance = self._desired_speed * self._step
-        traversed_distance = abs(self._entire_distance - next_cell_distance)
-        if desired_traversed_distance < traversed_distance: 
-            pass
+        traversed_distance = abs(self._entire_distance - scenario.target_distance_grids[self._position[0]][self._position[1]])
+        distance_error = traversed_distance - desired_traversed_distance
+        # Search for optimal step
+        if distance_error <= 0:
+            while (distance_error <= 0):
+                self._path.append(self._position)
+                neighbors = self.get_neighbors(scenario)
+                next_cell_distance = scenario.target_distance_grids[self._position[0]][self._position[1]]
+                next_pos = self._position
+                for (n_x, n_y) in neighbors:
+                    if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
+                        next_pos = (n_x, n_y)
+                        next_cell_distance = scenario.target_distance_grids[n_x, n_y]
+                self._position = next_pos
+                traversed_distance = abs(self._entire_distance - next_cell_distance)
+                distance_error = traversed_distance - desired_traversed_distance
+                if next_cell_distance == 0:
+                    break
         else:
-            # Search for optimal step
-            for (n_x, n_y) in neighbors:
-                if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
-                    next_pos = (n_x, n_y)
-                    next_cell_distance = scenario.target_distance_grids[n_x, n_y]
-            self._position = next_pos
+            pass
         self._step = self._step + 1
