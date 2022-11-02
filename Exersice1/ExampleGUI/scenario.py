@@ -33,9 +33,10 @@ class Scenario:
         ID2NAME[2]: 2,
         ID2NAME[3]: 3
     }
-    DELTA_T = 1.0
+    DELTA_X = 1/3
+    DELTA_T = 1/4
     RMAX = 3
-    distance_mode = 1
+    distance_mode = 0
 
     def __init__(self, width, height):
         if width < 1 or width > 1024:
