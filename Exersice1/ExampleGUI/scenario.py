@@ -1,4 +1,3 @@
-from turtle import onscreenclick
 import numpy as np
 from PIL import Image, ImageTk
 import scipy.spatial.distance
@@ -13,7 +12,7 @@ class Scenario:
     """
     A scenario for a cellular automaton.
     """
-    GRID_SIZE = (500, 500)
+    GRID_SIZE = (1000, 1000)
     ID2NAME = {
         0: 'EMPTY',
         1: 'TARGET',
@@ -21,11 +20,11 @@ class Scenario:
         3: 'PEDESTRIAN'
     }
     NAME2COLOR = {
-        'EMPTY': (255, 255, 255),
+        'EMPTY': (0, 0, 0),
         'PEDESTRIAN': (255, 0, 0),
         'TARGET': (0, 0, 255),
         'OBSTACLE': (0, 255, 0),
-        'PATH' : (255, 200, 200)
+        'PATH' : (150, 100, 100)
     }
     NAME2ID = {
         ID2NAME[0]: 0,

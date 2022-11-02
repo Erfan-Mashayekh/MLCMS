@@ -105,7 +105,7 @@ class MainGUI():
         three Pedestrian instances and multiple targets.
         """
         win = tkinter.Tk()
-        win.geometry('500x500')  # setting the size of the window
+        win.geometry('1050x1050')  # setting the size of the window
         win.title('Cellular Automata GUI')
 
         canvas = Canvas(win, width=Scenario.GRID_SIZE[0], height=Scenario.GRID_SIZE[1])  # creating the canvas
