@@ -59,9 +59,11 @@ class Pedestrian:
                 next_cell_distance = scenario.target_distance_grids[self._position[0]][self._position[1]]
                 next_pos = self._position
                 for (n_x, n_y) in neighbors:
-                    if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
+                    # if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
+                    if next_cell_distance > scenario.cost[n_x, n_y]:
                         next_pos = (n_x, n_y)
-                        next_cell_distance = scenario.target_distance_grids[n_x, n_y]
+                        # next_cell_distance = scenario.target_distance_grids[n_x, n_y]
+                        next_cell_distance = scenario.cost[n_x, n_y]
 
                 desired_traversed_distance = self._desired_speed * self._step * scenario.DELTA_T
                 self._traversed_distance = self._traversed_distance \
