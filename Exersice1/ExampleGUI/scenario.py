@@ -33,8 +33,11 @@ class Scenario:
         ID2NAME[3]: 3
     }
     DELTA_T = 1.0
-    RMAX = 3
-    distance_mode = 1
+
+    # Hard-coded settings
+    despawn = True      # If True pedestrians are removed from the scenario
+                        #   once they reach a target
+    distance_mode = 1   # 1 -> shortest path; 2 -> euclidean distance
 
     def __init__(self, width, height):
         if width < 1 or width > 1024:
@@ -174,17 +177,7 @@ class Scenario:
         """
         self.pedestrian_cost = np.zeros((self.width, self.height))
         for pedestrian in self.pedestrians:
-            for x in range(2*self.RMAX+1):
-                for y in range(2*self.RMAX+1):
-                    margin = np.array([x - self.RMAX, y - self.RMAX])
-                    r = sqrt(margin[0]**2 + margin[1]**2)
-
-                    if r < self.RMAX \
-                        and 0 < margin[0] + pedestrian.position[0] < self.width \
-                        and 0 < margin[1] + pedestrian.position[1] < self.height:
-                            self.pedestrian_cost[pedestrian.position[0] \
-                                + margin[0]][pedestrian.position[1] + margin[1]] \
-                                = np.exp(1./(r**2 - self.RMAX**2))
+            pedestrian.add_compute_potential(self.pedestrian_cost)
 
     def update_step(self):
         """
@@ -196,11 +189,17 @@ class Scenario:
         for pedestrian in self.pedestrians:
             pedestrian.update_step(self)
 
+            # Despawn pedestrians once they reach a target
+            x, y = pedestrian.position
+            if self.despawn == True and [x, y] in self.targets:
+                pedestrian.set_status_to_despawned()
+
+
     @staticmethod
     def cell_to_color(_id):
         return Scenario.NAME2COLOR[Scenario.ID2NAME[_id]]
 
-    def target_grid_to_image(self, canvas, old_image_id):
+    def grid_to_image(self, mode, canvas, old_image_id):
         """
         Creates a colored image based on the distance to the target stored in
         self.target_distance_gids.
@@ -212,14 +211,18 @@ class Scenario:
         self.compute_overall_costs()
         for x in range(self.width):
             for y in range(self.height):
-                #target_distance = self.target_distance_grids[x][y]
-                target_distance = self.cost[x][y]
+                if mode == 'cost':
+                    grid = self.cost[x][y]
+                elif mode == 'dist':
+                    grid = self.target_distance_grids[x][y]
+                else:
+                    raise ValueError("Mode must either be 'cost' or 'dist'")
                 if self._is_obstacle(x, y):
                     pix[x, y] = (255, 255, 255)
                     continue
-                pix[x, y] = (max(0, min(255, int(10 * target_distance) - 0 * 255)),
-                             max(0, min(255, int(10 * target_distance) - 1 * 255)),
-                             max(0, min(255, int(10 * target_distance) - 2 * 255)))
+                pix[x, y] = (max(0, min(255, int(10 * grid) - 0 * 255)),
+                             max(0, min(255, int(10 * grid) - 1 * 255)),
+                             max(0, min(255, int(10 * grid) - 2 * 255)))
         im = im.resize(Scenario.GRID_SIZE, Image.NONE)
         self.grid_image = ImageTk.PhotoImage(im)
         canvas.itemconfigure(old_image_id, image=self.grid_image)
@@ -237,10 +240,11 @@ class Scenario:
             for y in range(self.height):
                 pix[x, y] = self.cell_to_color(self.grid[x, y])
         for pedestrian in self.pedestrians:
-            x, y = pedestrian.position
-            pix[x, y] = Scenario.NAME2COLOR['PEDESTRIAN']
             for [x, y] in pedestrian.path:
                 pix[x, y] = Scenario.NAME2COLOR['PATH']
+            if pedestrian.status != 'despawned':
+                x, y = pedestrian.position
+                pix[x, y] = Scenario.NAME2COLOR['PEDESTRIAN']
         im = im.resize(Scenario.GRID_SIZE, Image.NONE)
         self.grid_image = ImageTk.PhotoImage(im)
         canvas.itemconfigure(old_image_id, image=self.grid_image)

@@ -5,6 +5,7 @@ import json
 from tkinter import Button, Canvas, Menu, filedialog
 from scenario import Scenario
 from pedestrian import Pedestrian
+from time import sleep
 
 
 class MainGUI():
@@ -40,14 +41,21 @@ class MainGUI():
                             canvas_image) -> None:
         """
         Moves the simulation forward by one step, and visualizes the result.
-
-        Args:
-            scenario (scenario_elements.Scenario): Add _description_
-            canvas (tkinter.Canvas): Add _description_
-            canvas_image (missing _type_): Add _description_
         """
         self.scenario.update_step()
         self.scenario.to_image(canvas, canvas_image)
+
+    def play_scenario(self, canvas : Canvas,
+                            canvas_image,
+                            win : tkinter.Tk) -> None:
+        """
+        Moves the simulation forward by 50 steps, and visualizes the result.
+        """
+        for i in range(50):
+            self.scenario.update_step()
+            self.scenario.to_image(canvas, canvas_image)
+            win.update()
+            sleep(0.05)
 
     def load_scenario(self, canvas : Canvas,
                             canvas_image,
@@ -94,8 +102,8 @@ class MainGUI():
         """
         sys.exit()
 
-    def show_target_distance_map(self, canvas, canvas_image):
-        self.scenario.target_grid_to_image(canvas, canvas_image)
+    def show_cost(self, canvas, canvas_image):
+        self.scenario.grid_to_image('cost', canvas, canvas_image)
 
     def start_gui(self, ):
         """
@@ -131,12 +139,15 @@ class MainGUI():
         btn = Button(win, text='Step simulation',
                      command=lambda: self.step_scenario(canvas, canvas_image))
         btn.place(x=20, y=10)
+        btn = Button(win, text='play 50 steps',
+                     command=lambda: self.play_scenario(canvas, canvas_image, win))
+        btn.place(x=200, y=10)
         btn = Button(win, text='Restart simulation',
                      command=self.restart_scenario)
-        btn.place(x=200, y=10)
-        btn = Button(win, text='Show Distance',
-                     command=lambda: self.show_target_distance_map(canvas, canvas_image))
-        btn.place(x=380, y=10)
+        btn.place(x=450, y=10)
+        btn = Button(win, text='Show Cost',
+                     command=lambda: self.show_cost(canvas, canvas_image))
+        btn.place(x=900, y=10)
 
         win.mainloop()
 
