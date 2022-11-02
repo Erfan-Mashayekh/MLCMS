@@ -33,6 +33,8 @@ class Scenario:
         ID2NAME[2]: 2,
         ID2NAME[3]: 3
     }
+    DELTA_T = 1.0
+    RMAX = 3
     distance_mode = 1
 
     def __init__(self, width, height):
@@ -48,7 +50,9 @@ class Scenario:
         self.pedestrians : List[Pedestrian]
         self.pedestrians = []
         self.targets = []
-        self.target_distance_grids = np.zeros((self.width, self.height))
+        self.target_distance_grids = np.zeros((width, height))
+        self.pedestrian_cost = np.zeros((width, height))
+        self.cost = np.zeros((width, height))
 
     def recompute_target_distances(self):
         """
@@ -161,12 +165,35 @@ class Scenario:
 
         self.target_distance_grids = distances.reshape((self.width, self.height))
 
+    def compute_overall_costs(self):
+        self.compute_pedestrians_costs()
+        self.cost = self.pedestrian_cost + self.target_distance_grids
+
+    def compute_pedestrians_costs(self) -> None:
+        """
+        Computes the utility (cost) imposed on a pedestrian by other pedestrians.
+        """
+        self.pedestrian_cost = np.zeros((self.width, self.height))
+        for pedestrian in self.pedestrians:
+            for x in range(2*self.RMAX+1):
+                for y in range(2*self.RMAX+1):
+                    margin = np.array([x - self.RMAX, y - self.RMAX])
+                    r = sqrt(margin[0]**2 + margin[1]**2)
+
+                    if r < self.RMAX \
+                        and 0 < margin[0] + pedestrian.position[0] < self.width \
+                        and 0 < margin[1] + pedestrian.position[1] < self.height:
+                            self.pedestrian_cost[pedestrian.position[0] \
+                                + margin[0]][pedestrian.position[1] + margin[1]] \
+                                = np.exp(1./(r**2 - self.RMAX**2))
+
     def update_step(self):
         """
         Updates the position of all pedestrians.
         This does not take obstacles or other pedestrians into account.
         Pedestrians can occupy the same cell.
         """
+        self.compute_overall_costs()
         for pedestrian in self.pedestrians:
             pedestrian.update_step(self)
 
@@ -183,9 +210,11 @@ class Scenario:
         """
         im = Image.new(mode="RGB", size=(self.width, self.height))
         pix = im.load()
+        self.compute_overall_costs()
         for x in range(self.width):
             for y in range(self.height):
-                target_distance = self.target_distance_grids[x][y]
+                #target_distance = self.target_distance_grids[x][y]
+                target_distance = self.cost[x][y]
                 if self._is_obstacle(x, y):
                     pix[x, y] = (255, 255, 255)
                     continue

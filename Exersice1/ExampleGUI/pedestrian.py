@@ -11,6 +11,7 @@ class Pedestrian:
         self._desired_speed = desired_speed
         self._path = []
 
+
     @property
     def position(self):
         return self._position
@@ -46,13 +47,15 @@ class Pedestrian:
 
         :param scenario: The current scenario instance.
         """
+        # Search for optimal step
         self._path.append(self._position)
         neighbors = self.get_neighbors(scenario)
         next_cell_distance = scenario.target_distance_grids[self._position[0]][self._position[1]]
         next_pos = self._position
-        # Search for optimal step
         for (n_x, n_y) in neighbors:
-            if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
+            #if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
+            if next_cell_distance > scenario.cost[n_x, n_y]:
                 next_pos = (n_x, n_y)
-                next_cell_distance = scenario.target_distance_grids[n_x, n_y]
+                # next_cell_distance = scenario.target_distance_grids[n_x, n_y]
+                next_cell_distance = scenario.cost[n_x, n_y]
         self._position = next_pos
