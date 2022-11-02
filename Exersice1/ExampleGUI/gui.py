@@ -5,6 +5,7 @@ import json
 from tkinter import Button, Canvas, Menu, filedialog
 from scenario import Scenario
 from pedestrian import Pedestrian
+from rimea import *
 
 
 class MainGUI():
@@ -14,10 +15,6 @@ class MainGUI():
     """
     # find path where this file is in
     _PATH = os.path.dirname(os.path.realpath(__file__))
-
-    def create_scenario(self, ):
-        # TODO:
-        print('create not implemented yet')
 
 
     def restart_scenario(self, ):
@@ -48,6 +45,9 @@ class MainGUI():
         """
         self.scenario.update_step()
         self.scenario.to_image(canvas, canvas_image)
+        # print("Measured Average Speed: ", sum(grid.pedestrian_speeds) / len(grid.pedestrian_speeds))
+        # print("Expected Average Speed: ", sum(speed_list) / len(speed_list))
+
 
     def load_scenario(self, canvas : Canvas,
                             canvas_image,
@@ -87,6 +87,24 @@ class MainGUI():
         self.restart_dict = {'type': 'load',
                              'args': (canvas, canvas_image, path)}
 
+    
+
+    def rimea_scenario_7(self, canvas : Canvas,
+                            canvas_image,
+                            path : str = None):
+        """ Create environment for RiMEA scenario 7 in task 5 """
+        sc = Scenario(90, 90)
+        self.restart_dict = {'type': 'load',
+                             'args': (canvas, canvas_image, path)}
+
+        for y in range(90):
+            sc.grid[90, y] = Scenario.NAME2ID['TARGET']
+            sc.targets.append([x, y])
+        for y in range(90):
+            sc.pedestrians.append(Pedestrian((0, y), 1))
+
+        self.scenario = sc
+        self.scenario.to_image(canvas, canvas_image)
 
     def exit_gui(self, ):
         """
@@ -116,11 +134,14 @@ class MainGUI():
         win.config(menu=menu)
         file_menu = Menu(menu)
         menu.add_cascade(label='Simulation', menu=file_menu)
-        file_menu.add_command(label='New', command=self.create_scenario)
         file_menu.add_command(label='Load Scenario',
                               command=lambda: self.load_scenario(canvas, canvas_image))
+        file_menu.add_command(label='rimea scenario 4',
+                              command=lambda: rimea.rimea_scenario_4(canvas, canvas_image))
         file_menu.add_command(label='Restart', command=self.restart_scenario)
         file_menu.add_command(label='Close', command=self.exit_gui)
+        
+        
 
 
         path = os.path.abspath(
