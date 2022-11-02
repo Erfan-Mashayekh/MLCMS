@@ -10,8 +10,6 @@ class Pedestrian:
         self._position = position
         self._desired_speed = desired_speed
         self._path = []
-        self._entire_distance = 0
-        self._step = 0
 
 
     @property
@@ -25,14 +23,6 @@ class Pedestrian:
     @property
     def path(self):
         return self._path
-
-    @property
-    def entire_distance(self):
-        return self._entire_distance
-
-    @entire_distance.setter
-    def entire_distance(self, entire_distance):
-        self._entire_distance = entire_distance
 
     def get_neighbors(self, scenario):
         """
@@ -57,25 +47,15 @@ class Pedestrian:
 
         :param scenario: The current scenario instance.
         """
-        desired_traversed_distance = self._desired_speed * self._step
-        traversed_distance = abs(self._entire_distance - scenario.target_distance_grids[self._position[0]][self._position[1]])
-        distance_error = traversed_distance - desired_traversed_distance
         # Search for optimal step
-        if distance_error <= 0:
-            while (distance_error <= 0):
-                self._path.append(self._position)
-                neighbors = self.get_neighbors(scenario)
-                next_cell_distance = scenario.target_distance_grids[self._position[0]][self._position[1]]
-                next_pos = self._position
-                for (n_x, n_y) in neighbors:
-                    if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
-                        next_pos = (n_x, n_y)
-                        next_cell_distance = scenario.target_distance_grids[n_x, n_y]
-                self._position = next_pos
-                traversed_distance = abs(self._entire_distance - next_cell_distance)
-                distance_error = traversed_distance - desired_traversed_distance
-                if next_cell_distance == 0:
-                    break
-        else:
-            pass
-        self._step = self._step + 1
+        self._path.append(self._position)
+        neighbors = self.get_neighbors(scenario)
+        next_cell_distance = scenario.target_distance_grids[self._position[0]][self._position[1]]
+        next_pos = self._position
+        for (n_x, n_y) in neighbors:
+            #if next_cell_distance > scenario.target_distance_grids[n_x, n_y]:
+            if next_cell_distance > scenario.cost[n_x, n_y]:
+                next_pos = (n_x, n_y)
+                # next_cell_distance = scenario.target_distance_grids[n_x, n_y]
+                next_cell_distance = scenario.cost[n_x, n_y]
+        self._position = next_pos
