@@ -5,8 +5,8 @@ class Pedestrian:
     """
     Defines a single pedestrian.
     """
-    R_MAX = 5               # Radius used in avoidance potential
-    INTERACTION_SCALE = 3.0 # Characteristic scale of avoidance potential
+    R_MAX = 3               # Radius used in avoidance potential
+    INTERACTION_SCALE = 2.0 # Characteristic scale of avoidance potential
     status = 'walking'
 
     def __init__(self, position, desired_speed):
@@ -66,6 +66,10 @@ class Pedestrian:
             if next_cell_cost > cost[n_x, n_y]: # TODO: Think about better ways
                 self._position = (n_x, n_y)
                 next_cell_cost = cost[n_x, n_y]
+            # due to errors associated with floating point arithmetics:
+            elif abs(next_cell_cost - cost[n_x, n_y]) < 1e-13:
+                if not ((n_x - x)**2 == 1 and (n_y - y) == 1):
+                    self._position = (n_x, n_y)
 
     def add_compute_potential(self, cost_grid : np.ndarray,
                                     sign = +1):
