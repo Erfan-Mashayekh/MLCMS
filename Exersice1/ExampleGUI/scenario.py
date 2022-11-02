@@ -38,10 +38,10 @@ class Scenario:
     distance_mode = 1
 
     def __init__(self, width, height):
-        if width < 1 or width > 1024:
-            raise ValueError(f"Width {width} must be in [1, 1024].")
-        if height < 1 or height > 1024:
-            raise ValueError(f"Height {height} must be in [1, 1024].")
+        if width < 1 or width > 4096:
+            raise ValueError(f"Width {width} must be in [1, 4096].")
+        if height < 1 or height > 4096:
+            raise ValueError(f"Height {height} must be in [1, 4096].")
 
         self.width = width
         self.height = height

@@ -5,7 +5,7 @@ import json
 from tkinter import Button, Canvas, Menu, filedialog
 from scenario import Scenario
 from pedestrian import Pedestrian
-from rimea import *
+from rimea import rimea_scenario_4
 
 
 class MainGUI():
@@ -87,7 +87,7 @@ class MainGUI():
         self.restart_dict = {'type': 'load',
                              'args': (canvas, canvas_image, path)}
 
-    
+
 
     def rimea_scenario_7(self, canvas : Canvas,
                             canvas_image,
@@ -137,11 +137,11 @@ class MainGUI():
         file_menu.add_command(label='Load Scenario',
                               command=lambda: self.load_scenario(canvas, canvas_image))
         file_menu.add_command(label='rimea scenario 4',
-                              command=lambda: rimea.rimea_scenario_4(canvas, canvas_image))
+                              command=lambda: rimea_scenario_4(canvas, canvas_image))
         file_menu.add_command(label='Restart', command=self.restart_scenario)
         file_menu.add_command(label='Close', command=self.exit_gui)
-        
-        
+
+
 
 
         path = os.path.abspath(

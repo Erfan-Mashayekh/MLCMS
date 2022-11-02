@@ -3,21 +3,27 @@ from scenario import Scenario
 from pedestrian import Pedestrian
 from tkinter import Canvas
 
-def rimea_scenario_4(self, canvas : Canvas,
-                            canvas_image,
-                            path : str = None):
-        """ Create environment for RiMEA scenario 4 in task 5 """
+def rimea_scenario_4(   canvas : Canvas,
+                        canvas_image,
+                        path : str = None):
+        """
+        Create scenario for RiMEA scenario 4 in task 5
+        """
         sc = Scenario(3000, 3000)
+
+        # Add walls:
         for x in range(0, 3000):
             y_1 = 1500
             y_2 = 1531
             sc.grid[x, y_1] = Scenario.NAME2ID['OBSTACLE']
             sc.grid[x, y_2] = Scenario.NAME2ID['OBSTACLE']
-        sc.recompute_target_distances()
 
+        #Add targets
         for y in range(1501, 1530):
             sc.grid[2999, y] = Scenario.NAME2ID['TARGET']
             sc.targets.append([2999, y])
+
+        sc.recompute_target_distances() # TODO: Check this
 
         possible_pedestrians = []
 
@@ -77,7 +83,7 @@ def rimea_scenario_4(self, canvas : Canvas,
             x, y = possible_pedestrians[id]
             sc.pedestrians.append(Pedestrian((x, y), 1.2))
 
-        self.scenario = sc
-        self.scenario.to_image(canvas, canvas_image)
-        self.restart_dict = {'type': 'load',
-                             'args': (canvas, canvas_image, path)}
+        sc.to_image(canvas, canvas_image)
+
+        # TODO:
+        # self.restart_dict = {'type': 'load', 'args': (canvas, canvas_image, path)}
