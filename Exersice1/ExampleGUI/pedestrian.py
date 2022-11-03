@@ -5,7 +5,7 @@ class Pedestrian:
     """
     Defines a single pedestrian.
     """
-    R_MAX = 3               # Radius used in avoidance potential TODO: check unit
+    R_MAX = 2               # Radius used in avoidance potential TODO: check unit
     INTERACTION_SCALE = 2.0 # Characteristic scale of avoidance potential
     status = 'walking'
 
@@ -39,13 +39,16 @@ class Pedestrian:
         :param scenario: The scenario instance.
         :return: A list of neighbor cell indices (x,y) around the current position.
         """
+        x, y = self._position
         return [
-            (int(x + self._position[0]), int(y + self._position[1]))
-            for x in [-1, 0, 1]
-            for y in [-1, 0, 1]
-            if 0 <= x + self._position[0] < scenario.width \
-                    and 0 <= y + self._position[1] < scenario.height \
-                    and np.abs(x) + np.abs(y) > 0
+            (int(n_x + x), int(n_y + y))
+            for n_x in [-1, 0, 1]
+            for n_y in [-1, 0, 1]
+            if 0 <= n_x + self._position[0] < scenario.width \
+                    and 0 <= n_y + self._position[1] < scenario.height \
+                    and np.abs(n_x) + np.abs(n_y) > 0 \
+                    and scenario.grid[int(n_x + x), int(n_y + y)] \
+                        != scenario.NAME2ID['OBSTACLE']
         ]
 
     def update_step(self, sc):
