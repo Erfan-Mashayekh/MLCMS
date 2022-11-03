@@ -68,7 +68,7 @@ class Pedestrian:
                 self._path.append(self._position)
 
                 cost = sc.cost
-                self.add_compute_potential(cost, sign= -1) # remove self-interaction
+                self.add_potential(cost, sign= -1) # remove self-interaction
 
                 # Search for optimal step
                 neighbors = self.get_neighbors(sc)
@@ -94,8 +94,8 @@ class Pedestrian:
             update_dist_err()
         self._step += 1
 
-    def add_compute_potential(self, cost_grid : np.ndarray,
-                                    sign = +1):
+    def add_potential(self, cost_grid : np.ndarray,
+                            sign = +1):
         """
         adds the cost (negative utility) added by the pedestrian to the
         cost_grid.

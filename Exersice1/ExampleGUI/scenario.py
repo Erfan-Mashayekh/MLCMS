@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 import scipy.spatial.distance
 import networkx as nx
 
+from tkinter import Canvas # use for typing only
 from typing import List
 from pedestrian import Pedestrian
 
@@ -146,6 +147,18 @@ class Scenario:
         G.remove_nodes_from(obstacle_ids)
         return G
 
+    def _assign_infinite_cost_to_obstacles(self):
+        """
+        This functions serves no useful purpose other than fulfilling task:
+            "Implement rudimentary obstacle avoidance for pedestrians by adding
+            a penalty (large cost in the cost function) for stepping onto an
+            obstacle cell."
+        Movement onto obstacles is not even considered by pedestrians.
+        """
+        for i in range(self.width):
+            for j in range(self.height):
+                if self._is_obstacle(i, j):
+                    self.cost[i, j] = np.inf
 
     def _compute_euclidean_distances(self) -> None:
         """
@@ -177,21 +190,22 @@ class Scenario:
         self.target_distance_grids = distances.reshape((self.width, self.height))
 
     def compute_overall_costs(self):
-        self.compute_pedestrians_costs()
+        self._compute_pedestrians_costs()
         self.cost = self.pedestrian_cost + self.target_distance_grids
+        self._assign_infinite_cost_to_obstacles() # useless
 
-    def compute_pedestrians_costs(self) -> None:
+    def _compute_pedestrians_costs(self) -> None:
         """
         Computes the utility (cost) imposed on a pedestrian by other pedestrians.
         """
         self.pedestrian_cost = np.zeros((self.width, self.height))
         for pedestrian in self.pedestrians:
-            pedestrian.add_compute_potential(self.pedestrian_cost)
+            pedestrian.add_potential(self.pedestrian_cost)
 
     def update_step(self):
         """
         Updates the position of all pedestrians.
-        This does not take obstacles or other pedestrians into account.
+        Takes obstacles into account.
         Pedestrians can occupy the same cell.
         """
         self.compute_overall_costs()
@@ -209,7 +223,7 @@ class Scenario:
     def cell_to_color(_id):
         return Scenario.NAME2COLOR[Scenario.ID2NAME[_id]]
 
-    def grid_to_image(self, mode, canvas, old_image_id):
+    def grid_to_image(self, mode, canvas : Canvas, old_image_id):
         """
         Creates a colored image based on the distance to the target stored in
         self.target_distance_gids.
@@ -240,7 +254,7 @@ class Scenario:
         self.grid_image = ImageTk.PhotoImage(im)
         canvas.itemconfigure(old_image_id, image=self.grid_image)
 
-    def to_image(self, canvas, old_image_id):
+    def to_image(self, canvas : Canvas, old_image_id):
         """
         Creates a colored image based on the ids stored in self.grid.
         Pedestrians are drawn afterwards, separately.
