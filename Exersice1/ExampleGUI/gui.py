@@ -16,10 +16,6 @@ class MainGUI():
     # find path where this file is in
     _PATH = os.path.dirname(os.path.realpath(__file__))
 
-    def create_scenario(self, ):
-        # TODO:
-        print('create not implemented yet')
-
 
     def restart_scenario(self, ):
         """restarts the scenario
@@ -124,7 +120,6 @@ class MainGUI():
         win.config(menu=menu)
         file_menu = Menu(menu)
         menu.add_cascade(label='Simulation', menu=file_menu)
-        file_menu.add_command(label='New', command=self.create_scenario)
         file_menu.add_command(label='Load Scenario',
                               command=lambda: self.load_scenario(canvas, canvas_image))
         file_menu.add_command(label='Restart', command=self.restart_scenario)
