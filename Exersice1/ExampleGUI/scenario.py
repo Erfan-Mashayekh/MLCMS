@@ -2,7 +2,6 @@ import numpy as np
 from PIL import Image, ImageTk
 import scipy.spatial.distance
 import networkx as nx
-from math import sqrt
 
 from typing import List
 from pedestrian import Pedestrian
@@ -32,7 +31,8 @@ class Scenario:
         ID2NAME[2]: 2,
         ID2NAME[3]: 3
     }
-    DELTA_T = 1.0
+    DELTA_T = 0.25  # sec / step
+    DELTA_X = 0.333 # linear size of a tile
 
     # Hard-coded settings
     despawn = True      # If True pedestrians are removed from the scenario
@@ -75,7 +75,7 @@ class Scenario:
 
     def _compute_walking_distances(self) -> None:
         """
-        Computes walking distance, along "cell directions".
+        Computes walking distance, along "cell directions" in units of DELTA_X.
         The distance calculation account for obstacles.
 
         Writes the distance for every grid cell, as a np.ndarray to
@@ -129,11 +129,11 @@ class Scenario:
                 if i + 1 < self.width:
                     G.add_edge(id, id + 1, weight=1)
                     if j + 1 < self.height:
-                        G.add_edge(id, id + 1 + self.width, weight=sqrt(2))
+                        G.add_edge(id, id + 1 + self.width, weight=np.sqrt(2))
                 if j + 1 < self.height:
                     G.add_edge(id, id + self.width, weight=1)
                     if i - 1 > -1:
-                        G.add_edge(id, id - 1 + self.width, weight=sqrt(2))
+                        G.add_edge(id, id - 1 + self.width, weight=np.sqrt(2))
         G.remove_nodes_from(obstacle_ids)
         return G
 
@@ -187,11 +187,12 @@ class Scenario:
         """
         self.compute_overall_costs()
         for pedestrian in self.pedestrians:
-            pedestrian.update_step(self)
+            if pedestrian.status == 'walking':
+                pedestrian.update_step(self)
 
             # Despawn pedestrians once they reach a target
             x, y = pedestrian.position
-            if self.despawn == True and [x, y] in self.targets:
+            if Scenario.despawn == True and [x, y] in self.targets:
                 pedestrian.set_status_to_despawned()
 
 
@@ -241,7 +242,9 @@ class Scenario:
                 pix[x, y] = self.cell_to_color(self.grid[x, y])
         for pedestrian in self.pedestrians:
             for [x, y] in pedestrian.path:
-                pix[x, y] = Scenario.NAME2COLOR['PATH']
+                if not self.grid[x, y] == Scenario.NAME2ID['TARGET']:
+                    pix[x, y] = Scenario.NAME2COLOR['PATH']
+        for pedestrian in self.pedestrians:
             if pedestrian.status != 'despawned':
                 x, y = pedestrian.position
                 pix[x, y] = Scenario.NAME2COLOR['PEDESTRIAN']

@@ -5,7 +5,7 @@ class Pedestrian:
     """
     Defines a single pedestrian.
     """
-    R_MAX = 3               # Radius used in avoidance potential
+    R_MAX = 3               # Radius used in avoidance potential TODO: check unit
     INTERACTION_SCALE = 2.0 # Characteristic scale of avoidance potential
     status = 'walking'
 
@@ -13,6 +13,9 @@ class Pedestrian:
         self._position = position
         self._desired_speed = desired_speed
         self._path = []
+        self._traversed_dist = 0
+        self._dist_err = -1 # TODO: check -1 ?
+        self._step = 1
 
 
     @property
@@ -45,31 +48,48 @@ class Pedestrian:
                     and np.abs(x) + np.abs(y) > 0
         ]
 
-    def update_step(self, scenario):
+    def update_step(self, sc):
         """
         Moves to the cell with the lowest cost.
         Pedestrians can occupy the same cell, if the avoidance term is too low.
+        Takes into account the pedestrian speed.
 
-        :param scenario: The current scenario instance.
+        :param sc: The current scenario instance.
         """
-        self._path.append(self._position)
+        def update_dist_err():
+            desired_trav_dist = self._desired_speed * self._step * sc.DELTA_T
+            self._dist_err = self._traversed_dist - desired_trav_dist
 
-        distance = scenario.target_distance_grids
-        cost = scenario.cost
-        self.add_compute_potential(cost, sign= -1) # remove self-interaction
+        if self._dist_err <= -0.5 * sc.DELTA_X:
+            while self._dist_err < -0.5 * sc.DELTA_X:
+                self._path.append(self._position)
 
-        # Search for optimal step
-        neighbors = self.get_neighbors(scenario)
-        next_cell_cost = cost[self._position[0]][self._position[1]]
-        x, y = self._position
-        for (n_x, n_y) in neighbors:
-            if next_cell_cost > cost[n_x, n_y]: # TODO: Think about better ways
-                self._position = (n_x, n_y)
-                next_cell_cost = cost[n_x, n_y]
-            # due to errors associated with floating point arithmetics:
-            elif abs(next_cell_cost - cost[n_x, n_y]) < 1e-13:
-                if not ((n_x - x)**2 == 1 and (n_y - y) == 1):
-                    self._position = (n_x, n_y)
+                cost = sc.cost
+                self.add_compute_potential(cost, sign= -1) # remove self-interaction
+
+                # Search for optimal step
+                neighbors = self.get_neighbors(sc)
+                x, y = self._position
+
+                for (n_x, n_y) in neighbors:
+                    if cost[x][y] > cost[n_x, n_y]: # TODO: Think about better ways
+                        self._position = (n_x, n_y)
+                        cost[x][y] = cost[n_x, n_y]
+                    # due to errors associated with floating point arithmetics:
+                    elif abs(cost[x][y] - cost[n_x, n_y]) < 1e-13:
+                        # if multiple cells are equally desirable avoid diagonal steps
+                        if not ((n_x - x)**2 == 1 and (n_y - y) == 1):
+                            self._position = (n_x, n_y)
+
+                step_dist = np.linalg.norm(np.array([x, y]) - self._position)
+                if step_dist == 0:
+                    break
+                else:
+                    self._traversed_dist += step_dist * sc.DELTA_X
+                update_dist_err()
+        else:
+            update_dist_err()
+        self._step += 1
 
     def add_compute_potential(self, cost_grid : np.ndarray,
                                     sign = +1):
