@@ -53,6 +53,10 @@ class MainGUI():
             win.update()
             sleep(0.05)
 
+    def toggle_distance_mode(self):
+        self.scenario.toggle_distance_mode()
+        self.scenario.recompute_target_distances()
+
     def load_scenario(self, canvas : Canvas,
                             canvas_image,
                             path : str = None):
@@ -131,15 +135,18 @@ class MainGUI():
                     )
         self.load_scenario(canvas, canvas_image, path)
 
-        btn = Button(win, text='Step simulation',
+        btn = Button(win, text='Step',
                      command=lambda: self.step_scenario(canvas, canvas_image))
         btn.place(x=20, y=10)
-        btn = Button(win, text='play 50 steps',
+        btn = Button(win, text='Play 50 Steps',
                      command=lambda: self.play_scenario(canvas, canvas_image, win))
         btn.place(x=200, y=10)
-        btn = Button(win, text='Restart simulation',
+        btn = Button(win, text='Restart',
                      command=self.restart_scenario)
         btn.place(x=450, y=10)
+        btn = Button(win, text='Toggle Distance Mode',
+                     command=self.toggle_distance_mode)
+        btn.place(x=700, y=10)
         btn = Button(win, text='Show Cost',
                      command=lambda: self.show_cost(canvas, canvas_image))
         btn.place(x=900, y=10)

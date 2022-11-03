@@ -34,10 +34,10 @@ class Scenario:
     DELTA_T = 0.25  # sec / step
     DELTA_X = 0.333 # linear size of a tile
 
-    # Hard-coded settings
+    distance_mode = 1   # 1 -> shortest path; 0 -> euclidean distance
+
     despawn = True      # If True pedestrians are removed from the scenario
                         #   once they reach a target
-    distance_mode = 1   # 1 -> shortest path; 2 -> euclidean distance
 
     def __init__(self, width, height):
         if width < 1 or width > 1024:
@@ -55,6 +55,12 @@ class Scenario:
         self.target_distance_grids = np.zeros((width, height))
         self.pedestrian_cost = np.zeros((width, height))
         self.cost = np.zeros((width, height))
+
+    def toggle_distance_mode(self):
+        if self.distance_mode:
+            self.distance_mode = 0
+        else:
+            self.distance_mode = 1
 
     def recompute_target_distances(self):
         """
