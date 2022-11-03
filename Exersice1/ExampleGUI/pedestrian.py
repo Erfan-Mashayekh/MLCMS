@@ -17,7 +17,6 @@ class Pedestrian:
         self._dist_err = -1 # TODO: check -1 ?
         self._step = 1
 
-
     @property
     def position(self):
         return self._position
@@ -32,6 +31,13 @@ class Pedestrian:
 
     def set_status_to_despawned(self):
         self.status = 'despawned'
+
+    @staticmethod
+    def toggle_pedestrian_avoidance():
+        if Pedestrian.INTERACTION_SCALE:
+            Pedestrian.INTERACTION_SCALE = 0.0
+        else:
+            Pedestrian.INTERACTION_SCALE = 2.0
 
     def get_neighbors(self, scenario):
         """

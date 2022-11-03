@@ -141,10 +141,13 @@ class MainGUI():
         btn.place(x=20, y=10)
         btn = Button(win, text='Play 50 Steps',
                      command=lambda: self.play_scenario(canvas, canvas_image, win))
-        btn.place(x=200, y=10)
+        btn.place(x=100, y=10)
+        btn = Button(win, text='Toggle Pedestrian Avoidance On/Off',
+                     command=Pedestrian.toggle_pedestrian_avoidance)
+        btn.place(x= 250, y=10)
         btn = Button(win, text='Restart',
                      command=self.restart_scenario)
-        btn.place(x=450, y=10)
+        btn.place(x=600, y=10)
         btn = Button(win, text='Toggle Distance Mode',
                      command=self.toggle_distance_mode)
         btn.place(x=700, y=10)
