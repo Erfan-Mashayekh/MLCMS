@@ -116,7 +116,8 @@ class MainGUI():
         win.geometry('1050x1050')  # setting the size of the window
         win.title('Cellular Automata GUI')
 
-        canvas = Canvas(win, width=Scenario.GRID_SIZE[0], height=Scenario.GRID_SIZE[1])  # creating the canvas
+        canvas = Canvas(win, width=Scenario.GRID_SIZE[0],
+                        height=Scenario.GRID_SIZE[1])  # creating the canvas
         canvas_image = canvas.create_image(5, 50, image=None, anchor=tkinter.NW)
         canvas.pack()
 

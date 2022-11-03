@@ -97,7 +97,10 @@ class Scenario:
                 if self._is_obstacle(i, j):
                     continue
                 id = self.width * j + i # compute node id
-                distance_grids[i,j] = distance[id]
+                try:
+                    distance_grids[i,j] = distance[id]
+                except:
+                    distance_grids[i,j] = np.inf
         self.target_distance_grids = distance_grids
 
 
@@ -226,6 +229,9 @@ class Scenario:
                     raise ValueError("Mode must either be 'cost' or 'dist'")
                 if self._is_obstacle(x, y):
                     pix[x, y] = (255, 255, 255)
+                    continue
+                if grid == np.inf:
+                    pix[x, y] = (155, 155, 155)
                     continue
                 pix[x, y] = (max(0, min(255, int(10 * grid) - 0 * 255)),
                              max(0, min(255, int(10 * grid) - 1 * 255)),
