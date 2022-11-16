@@ -226,7 +226,7 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 					continue;
 				// Only if p is susceptible, we loop over neighbors and set infected if we are close
 				for(Pedestrian p_neighbor : neighbors) {
-					if(p == p_neighbor)
+					if(p == p_neighbor || getGroup(p_neighbor).getID() != SIRType.ID_INFECTED.ordinal())
 						continue;
 					// multiply by InfectionRate by simTimeInSec to decouple time step size
 					if (this.random.nextDouble() < attributesSIRG.getInfectionRate() * simTimeInSec) {
