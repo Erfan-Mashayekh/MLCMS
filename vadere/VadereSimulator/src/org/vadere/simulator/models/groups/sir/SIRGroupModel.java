@@ -209,8 +209,6 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 			}
 			// loop over all Pedestrians
 			for(Pedestrian p : c.getElements()) {
-				List<Pedestrian> neighbors = linkedCellsGrid.getObjects(p.getPosition(),
-																		attributesSIRG.getInfectionMaxDistance());
 				SIRGroup g = getGroup(p); // group od pedestrian p
 				if (g.getID() == SIRType.ID_INFECTED.ordinal()) {
 					// recovery mechanism
@@ -224,7 +222,10 @@ public class SIRGroupModel extends AbstractGroupModel<SIRGroup> {
 				if (g.getID() == SIRType.ID_REMOVED.ordinal())
 					// if we are recovered then we cant get infected
 					continue;
+
 				// Only if p is susceptible, we loop over neighbors and set infected if we are close
+				List<Pedestrian> neighbors = linkedCellsGrid.getObjects(p.getPosition(),
+																		attributesSIRG.getInfectionMaxDistance());
 				for(Pedestrian p_neighbor : neighbors) {
 					if(p == p_neighbor || getGroup(p_neighbor).getID() != SIRType.ID_INFECTED.ordinal())
 						continue;
