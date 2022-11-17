@@ -28,12 +28,12 @@ public abstract class SimulationModel<T extends DefaultSimulationConfig> extends
 		this.config.setAgentColoring(AgentColoring.GROUP);
 		this.colorMap = new ConcurrentHashMap<>();
 		this.colorMap.put(-1, config.getPedestrianDefaultColor());
-		// hard code SIR Coloring scheme
-//		final Color infectedColor = new Color(255, 0, 0);
-//		final Color recoveredColor = new Color(63, 150, 150);
-//		this.colorMap.put(0, config.getPedestrianDefaultColor());
-//		this.colorMap.put(1, infectedColor);
-//		this.colorMap.put(2, recoveredColor);
+		//hard code SIR Coloring scheme
+		final Color infectedColor = new Color(167, 7, 7);
+		final Color recoveredColor = new Color(244, 199, 0);
+		this.colorMap.put(0, infectedColor);
+		this.colorMap.put(1, config.getPedestrianDefaultColor());
+		this.colorMap.put(2, recoveredColor);
 		this.random = new Random();
 	}
 
