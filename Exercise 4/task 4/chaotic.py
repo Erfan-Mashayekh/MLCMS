@@ -40,9 +40,14 @@ def plot_logistic_map(r, x0):
         x = x_new
 
     ax1.set_xlim(0, 1)
+    ax1.set_xlabel("$x_n$")
+    ax1.set_ylabel("$x_{n+1}$")
     ax1.set_title(f"$r={r:.1f}, x_0={x0:.1f}$")
 
-    ax2.plot(np.arange(0, 1, 0.01), y, 'ok-')
+    ax2.set_xlabel("n")
+    ax2.set_ylabel("$x_n$")
+    ax2.plot(np.arange(0, 100, 1), y, 'ok-')
+    ax2.set_title(f"$r={r:.1f}$")
     # ax2.set_yscale("log")
 
 def plot_bifurcation(r_min, r_max, x0):
@@ -116,15 +121,26 @@ def difference(X1, X2, sigma, beta, rho):
     fig = plt.figure(figsize=(20, 20))
     ax1 = fig.add_subplot(2, 2, 1, projection='3d')
     ax1.plot(x1[:, 0], x1[:, 1], x1[:, 2])
+    ax1.set_xlabel("x")
+    ax1.set_ylabel("y")
+    ax1.set_zlabel("z")
     ax1.set_title(f"$sigma={sigma}, beta={round(beta,2)}, rho={rho}, X_0=[{X1[0]}, {X1[1]}, {X1[2]}]$")
+
     ax2 = fig.add_subplot(2, 2, 2, projection='3d')
     ax2.plot(x2[:, 0], x2[:, 1], x2[:, 2])
+    ax2.set_xlabel("x")
+    ax2.set_ylabel("y")
+    ax2.set_zlabel("z")
     ax2.set_title(f"$sigma={sigma}, beta={round(beta,2)}, rho={rho}, X_0=[{X2[0]}, {X2[1]}, {X2[2]}]$")
 
     ax3 = fig.add_subplot(2, 2, 3, projection='3d')
     ax3.plot(x1[:, 0], x1[:, 1], x1[:, 2], label=f"$X_0=[{X1[0]}, {X1[1]}, {X1[2]}]$", color='red')
     ax3.plot(x2[:, 0], x2[:, 1], x2[:, 2], label=f"$X_0=[{X2[0]}, {X2[1]}, {X2[2]}]$", color='green')
     ax3.legend()
+    ax3.set_xlabel("x")
+    ax3.set_ylabel("y")
+    ax3.set_zlabel("z")
+    ax3.set_title("compare the trajectories")
 
     x = x1 - x2
     diff = np.linalg.norm(x, axis=1, keepdims=True) ** 2
@@ -132,6 +148,7 @@ def difference(X1, X2, sigma, beta, rho):
     ax4.plot(np.arange(0, 1000, 0.01), diff)
     ax4.set_xlabel("Time")
     ax4.set_ylabel("Difference")
+    ax4.set_title("the difference between the points on the trajectories")
 
     iterations = 0
     for i, d in enumerate(diff):
