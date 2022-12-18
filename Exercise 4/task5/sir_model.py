@@ -1,4 +1,3 @@
-
 def mu(b, I, mu0, mu1):
     """Recovery rate.
     
