@@ -52,3 +52,27 @@ def plot_bifurcation(b_array: ArrayLike,
             plt.savefig("./case{}.png".format(case), dpi='figure')
 
         plt.show()
+
+def plot_phase(mu0, mu1, beta, A, d, nu, b):
+    fig = plt.figure(figsize=(20, 20))
+    ax = fig.add_subplot(projection='3d')
+
+    X, Y, Z  = np.meshgrid(np.linspace(195, 205, 10), np.linspace(0, 0.1, 10), np.linspace(0, 10, 10))
+    U, V, W = np.zeros(X.shape), np.zeros(Y.shape), np.zeros(Z.shape)
+    NI, NJ, NK = X.shape
+
+    for i in range(NI):
+        for j in range(NJ):
+            for k in range(NK):
+                x, y, z = X[0,i,0], Y[j,0,0], Z[0,0,k]
+                mu = mu0 + (mu1 - mu0) * (b/(y+b))
+                u = A - d * x - beta * x * y /(x + y + z)
+                v = -(d + nu) * y - mu * y + beta * x * y /(x + y + z)
+                w = mu * y - d * z
+                ax.quiver(x, y, z, u, v, w, length=0.8, normalize=False)
+
+    ax.plot(A/d, 0, 0,'o', color="r", label=f"$E_0$")
+    ax.set_xlabel("S")
+    ax.set_ylabel("I")
+    ax.set_zlabel("R")
+    ax.legend()
