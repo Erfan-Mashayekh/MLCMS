@@ -74,10 +74,13 @@ def radial_basis_lst_sqr_approx(X: np.ndarray,
             in a least squares sense
     """
     phi_X = radial_basis(X, grid, epsilon)
-    matrix = phi_X.T @ phi_X
-    target = phi_X.T @ F
-    coefficients, _, _, _ = scipy.linalg.lstsq(matrix, target, cond=cond)
-    return coefficients
+    # Alternative Implementation:
+    #   matrix = phi_X.T @ phi_X
+    #   target = phi_X.T @ F
+    #   coefficients, _, _, _ = scipy.linalg.lstsq(matrix, target, cond=cond)
+    coefficients_T, _, eff_rank, _ = scipy.linalg.lstsq(phi_X, F, cond=cond)
+    print("Effective Rank: ", eff_rank)
+    return coefficients_T.T
 
 
 def basic_data_plot_task1(X: np.ndarray, F: np.ndarray) -> None:
