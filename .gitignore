@@ -1,4 +1,4 @@
 .idea/
 *__pycache__
 Exercise3/data/FashionMNIST/*
-figures/
+figures/*

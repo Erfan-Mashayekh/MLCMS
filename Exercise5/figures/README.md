@@ -1,0 +1,1 @@
+This directory is used to output figures from the main notebook
