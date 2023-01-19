@@ -5,37 +5,13 @@ import datafold.dynfold as dfold
 import datafold.pcfold as pfold
 
 
-def linear_basis_lst_sqr_approx(X: np.ndarray, F: np.ndarray) -> float:
-    """
-    TODO: Also used in task 3 adapt documentation
-    Calculates the optimal parameter A of the linear function f(x) = A * x.
-    The entries x_i of X and f_i of F have to be scalars.
-    The output is optimal in a least squares sense.
-
-    Args:
-        X (np.ndarray): Data array of independent parameters (input)
-        F (np.ndarray): Data array of dependent parameters (label)
-
-    Returns:
-        float: slope a of the linear function f(x) = a * x such that
-            ||F - a * X||^2 is minimized w.r.t. a.
-    """
-    Xt_X = X.T @ X
-    Xt_F = X.T @ F
-    return Xt_F / Xt_X
-
-
-
-############################# TASK 1 #############################
-
 def radial_basis(X:     np.ndarray,
                  grid:  np.ndarray,
                  epsilon: float) -> np.ndarray:
-    """ TODO: ALSO used in task 3
+    """
     Computes a matrix (i,j) with the values phi_j(x_i) of the j-th basis
     function at the i-th data point. The basis functions are defined as
     phi_j(x) = exp(-||grid_j - x||^2 / epsilon^2)
-    The entries x_i of X have to be scalars.
 
     Args:
         X (np.ndarray, shape (N)): Data array of independent parameters
@@ -46,7 +22,7 @@ def radial_basis(X:     np.ndarray,
     Returns:
         np.ndarray, shape (N, L): matrix (i,j) with entries phi_j(x_i)
     """
-    if X.ndim == 1:
+    if X.ndim == 1: # reshaping required in case of 1-dim input
         out = np.exp(-(spatial.distance_matrix(X[:, None],grid[:, None]) / epsilon)**2)
     else:
         out = np.exp(-(spatial.distance_matrix(X, grid) / epsilon) ** 2)
@@ -58,7 +34,7 @@ def radial_basis_lst_sqr_approx(X: np.ndarray,
                                 grid: np.ndarray,
                                 epsilon: float,
                                 cond: float) -> np.ndarray:
-    """ TODO: Also used in Task 3
+    """
     Calculates the optimal coefficients C for the ansatz function:
     f(x) = sum_{l=1}^L c_l phi_l(x) such that C minimizes
     ||F - phi(X) @ C.T||^2 where phi_l are the radial basis functions used in
@@ -82,10 +58,29 @@ def radial_basis_lst_sqr_approx(X: np.ndarray,
     matrix = phi_X.T @ phi_X
     target = phi_X.T @ F
     coefficients, _, _, _ = linalg.lstsq(matrix, target, cond=cond)
-    # Alternative Implementation:
-    #   coefficients_T, _, eff_rank, _ = linalg.lstsq(phi_X, F, cond=cond)
-    #   print("Effective Rank: ", eff_rank)
     return coefficients
+
+
+############################# TASK 1 #############################
+
+def linear_basis_lst_sqr_approx(X: np.ndarray, F: np.ndarray) -> float:
+    """
+    Calculates the optimal parameter A of the linear function f(x) = A * x.
+    The x_i in X have to be scalars.
+    The output is optimal in a least squares sense.
+
+    Args:
+        X (np.ndarray): Data array of independent parameters (input)
+        F (np.ndarray): Data array of dependent parameters (label)
+
+    Returns:
+        float: slope a of the linear function f(x) = a * x such that
+            ||F - a * X||^2 is minimized w.r.t. a.
+    """
+    Xt_X = X.T @ X
+    Xt_F = X.T @ F
+    return Xt_F / Xt_X
+
 
 
 ############################# TASK 2 #############################
@@ -127,31 +122,47 @@ def t2_trajectory(point: np.ndarray,
 def vector_field(x0: np.ndarray, x1: np.ndarray, dt:float) -> np.ndarray:
     """
     Compute vector fields from two sequential data points
-    :param x0:
-    :param x1:
-    :param dt:
-    :return:
+
+    Args:
+        x0 (np.ndarray): positions
+        x1 (np.ndarray): next positions (advanced by evolution operator)
+        dt (float): time step size (of evolution operator)
+
+    Returns:
+        np.ndarray: velocity vector field approximated by finite differences
     """
     return (x1 - x0) / dt
 
 
-def compute_matrix_a(x0: np.ndarray, vector_field: np.ndarray):
+def compute_matrix_a(x0: np.ndarray, vector_field: np.ndarray) -> np.ndarray:
     """
-    Computes the coefficient matrix (A) in linear system of Ax=v using least square
-    :param x0: x
-    :param vector_field: v
-    :return: A
+    Computes the coefficient matrix (A) in linear system of Ax=v
+    using least squares
+
+    Args:
+        x0 (np.ndarray): _description_
+        vector_field (np.ndarray): _description_
+
+    Returns:
+        np.ndarray: optimal matrix in a least squares sense
     """
     return linalg.lstsq(x0, vector_field)[0].T
 
 
-def solve_ivp_implicit(matrix, x, dt):
+def solve_ivp_implicit(matrix: np.ndarray,
+                       x: np.ndarray,
+                       dt: float) -> np.ndarray:
     """
     Computes the initial value problem using a first order implicit method
-    :param matrix:
-    :param x:
-    :param dt:
-    :return:
+    dx / dt = matrix * x
+
+    Args:
+        matrix (np.ndarray)
+        x (np.ndarray): start value
+        dt (float): time step size
+
+    Returns:
+        np.ndarray: _description_
     """
     matrix_b = np.identity(2) - dt * matrix
     sol, _, _, _ = linalg.lstsq(matrix_b, x.T)
@@ -176,20 +187,25 @@ def compute_mse(x1: np.ndarray, x2: np.ndarray) -> float:
     """
     N = x1.shape[0]
     return np.sum((x1 - x2)**2)  / N
-    # return np.mean(np.linalg.norm(x-x_predicted, axis=0)**2 / x.shape[0])
 
 
 ############################# TASK 4 #############################
 
-def time_delay(X: np.ndarray, delta_t: int, is_periodic = False):
+def time_delay(X: np.ndarray,
+               delta_t: int,
+               is_periodic = False) -> np.ndarray:
     """
-    apply time delay multiple times
+    applies time delay multiple times
+
     Args:
-        X (np.ndarray): Data array of coordinate we want to do time-delay embeding
-        delta_t (float): the delay time Delta t
-        TODO:
+        X (np.ndarray): Data array of coordinate we want to do time-delay
+            embedding
+        delta_t (int): the delay time Delta t
+        is_periodic (bool, optional): specifies, whether data is periodic.
+            Defaults to False.
+
     Returns:
-        np.ndarray: (x(t), x(t + Delta t), x(t + Delta t))
+        np.ndarray: [x(t), x(t - delta_t), x(t - 2 * delta_t)]
     """
     if is_periodic:
         x1 = X
@@ -210,14 +226,14 @@ def _lorenz(t: float,
            beta: float,
            rho: float) -> np.ndarray:
     """
-    define the Lorenz equations
-    TODO:
+    define the Lorenz equations (LE)
+
     Args:
         t (float): time (dummy parameter)
         X (np.ndarray): initial condition
-        sigma (float): parameter TODO:!
-        beta (float): parameter
-        rho (float): parameter
+        sigma (float): parameter of (LE)
+        beta (float): parameter (LE)
+        rho (float): parameter (LE)
 
     Returns:
         np.ndarray: derivative of X w.r.t time
@@ -267,10 +283,15 @@ def t4_fun_radial_trajectory(X: np.ndarray,
                              start_time: float,
                              end_time: float) -> None:
     """
-    TODO:
-    integrate $x,y,z$ with respect to t by solve_ivp and plot the trajectory.
-    :param X: the initial condition
-    :param GRID_b, EPSILON, coefficients: Radial Basis paramters
+    integrate x,y,z with respect to t by solve_ivp and plot the trajectory.
+
+    Args:
+        X (np.ndarray): _description_
+        GRID_b (np.ndarray): Grid points of radial basis
+        epsilon (_type_): parameter controlling peakedness of radial basis
+        coefficients (_type_): coefficients of model w.r.t. chosen basis
+        start_time (float): start of trajectory
+        end_time (float): end of trajectory
     """
     t = np.linspace(start_time, end_time, 10000)
 

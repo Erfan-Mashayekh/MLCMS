@@ -5,7 +5,7 @@ from utils import time_delay
 
 ############################# TASK 1 #############################
 
-def basic_data_plot_task1(X: np.ndarray, F: np.ndarray) -> None:
+def t1_basic_data_plot(X: np.ndarray, F: np.ndarray) -> None:
     """
     configures a basic plot and adds data.
 
@@ -51,7 +51,15 @@ def plot_phase_portrait_linear(w: int, A: np.ndarray, x):
 ############################# TASK 3 #############################
 
 def t3_plot_points(*data: np.ndarray, fname: str = None) -> None:
+    """
+    Plots arbitrarily many datasets of two dimensional plots in one figure.
+    Each set of points gets a different color.
+    If filename is provided the figure is saved.
 
+    Args:
+        *data (np.ndarray):
+        fname (str, optional): filename. Defaults to None.
+    """
     plt.figure(figsize=(5, 5))
     for xy_array in data:
         plt.scatter(xy_array[:, 0], xy_array[:, 1], s=2)
@@ -83,10 +91,15 @@ def t3_plot_vector_fields(vec_field: np.ndarray,
 ############################# TASK 4 #############################
 
 def t4_takens(X: np.ndarray, delta_t: int, is_periodic = False) -> None:
-    """TODO:
+    """
+    Plots the time shifted time-series data against itself
+    as done in the application of takens
 
     Args:
-        X (np.ndarray): _description_
+        X (np.ndarray): positions x(t), where t is the index
+        delta_t (int): offset of relative time shifts
+        is_periodic (bool, optional): specifies whether data is periodic.
+            Defaults to False.
     """
     X, Y, Z = time_delay(X, delta_t, is_periodic)
 
@@ -107,10 +120,19 @@ def t4_takens(X: np.ndarray, delta_t: int, is_periodic = False) -> None:
     plt.show()
 
 
-def t4_coordinate_vs_index(data: np.ndarray,
+def t4_coordinate_vs_time(data: np.ndarray,
                            time_values: np.ndarray,
                            var_name: str,
                            ax) -> None:
+    """
+    Plots coordinate data vs time
+
+    Args:
+        data (np.ndarray): coordinates
+        time_values (np.ndarray): time values associated with coordinates
+        var_name (str): name of coordinate used in plot
+        ax: Axes object of matplotlib
+    """
     ax.set_xlabel("t")
     ax.set_ylabel(var_name)
     ax.set_title(f"plot the {var_name} against the line number")
@@ -138,7 +160,8 @@ def plot_arclength_velocities(vel: np.ndarray, arclength: np.ndarray) -> None:
     Plots the velocity on archlength over arclength of the curve
 
     Args:
-        vel:
+        vel (np.ndarray): velocity
+        time (np.ndarray): time
     """
     plt.rcParams["figure.figsize"] = (10, 5)
     curve_arclength = 2 * np.pi / arclength.size * arclength
@@ -154,7 +177,7 @@ def plot_vector_field(v_field: np.ndarray, arclength: np.ndarray) -> None:
     Plots the vector field in each period
 
     Args:
-        v_field:
+        v_field: the vector field
     """
     plt.rcParams["figure.figsize"] = (10, 5)
     plt.plot(arclength, v_field)
