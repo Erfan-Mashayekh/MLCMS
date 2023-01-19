@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import spatial, linalg, integrate
 import matplotlib.pyplot as plt
+import datafold.dynfold as dfold
+import datafold.pcfold as pfold
 
 
 def linear_basis_lst_sqr_approx(X: np.ndarray, F: np.ndarray) -> float:
@@ -278,3 +280,27 @@ def t4_fun_radial_trajectory(X: np.ndarray,
     ax1.set_zlabel("$x(t + 2*/Delta t)$")
     ax1.legend()
     ax1.set_title("trajectories of the training")
+
+
+############################# TASK 5 #############################
+
+def compute_eigenfunctions_datafold(x, sample):
+    """
+    Compute the eigenfunctions for the given dataset 'u_pca' using a Datafold.
+    Returns: eigenfunctions = [eigenvectors, eigenvalues]
+    """
+
+    # Create the Manifold using Datafold lib
+    positions_pcm = pfold.PCManifold(x)
+    positions_pcm.optimize_parameters()
+
+    # Compute the kernel and the eigenfunctions using Datafold lib
+    dmap = dfold.DiffusionMaps(
+        kernel=pfold.GaussianKernel(epsilon=positions_pcm.kernel.epsilon),
+        n_eigenpairs=sample,
+        dist_kwargs=dict(cut_off=positions_pcm.cut_off),
+    )
+    dmap = dmap.fit(positions_pcm)
+    evecs, evals = dmap.eigenvectors_, dmap.eigenvalues_
+
+    return evecs, evals
