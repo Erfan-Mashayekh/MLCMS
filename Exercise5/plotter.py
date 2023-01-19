@@ -167,7 +167,7 @@ def plot_arclength_velocities(vel: np.ndarray, arclength: np.ndarray) -> None:
         time (np.ndarray): time
     """
     plt.rcParams["figure.figsize"] = (10, 5)
-    curve_arclength = 2 * np.pi / arclength.size * arclength
+    curve_arclength = 2 * np.pi * arclength / np.max(arclength)
     plt.plot(curve_arclength, vel)
     plt.xlabel("arclength of the curve")
     plt.ylabel("velocity on arclength")
