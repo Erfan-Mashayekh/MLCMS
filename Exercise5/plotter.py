@@ -20,7 +20,7 @@ def t1_basic_data_plot(X: np.ndarray, F: np.ndarray) -> None:
     plt.grid(True)
 
 
-############################# TASK 3 #############################
+############################# TASK 2 #############################
 
 def plot_phase_portrait_linear(w: int, A: np.ndarray, x):
     """

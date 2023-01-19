@@ -249,12 +249,25 @@ def _lorenz(t: float,
     return dX_dt
 
 
-def lorenz_trajectory(X, sigma, beta, rho, start_time, end_time):
+def lorenz_trajectory(X: np.ndarray,
+                      sigma: float,
+                      beta: float,
+                      rho:float,
+                      start_time: float,
+                      end_time: float) -> np.ndarray:
     """
-    integrate $x,y,z$ with respect to $t$ by \emph{solve_ivp} and plot the trajectory.
-    :param X: the initial condition
-    :param sigma, beta, rho: Lorenz parameters
-    :param linewidth: the width of line in plot
+    integrates x,y,z with respect to t by solve_ivp and plots the trajectory.
+
+    Args:
+        X (np.ndarray): the initial condition
+        sigma (float): parameter of (LE)
+        beta (float): parameter (LE)
+        rho (float): parameter (LE)
+        start_time (float): start time
+        end_time (float): end time
+
+    Returns:
+        np.ndarray: _description_
     """
     t = np.linspace(start_time, end_time, 10000)
 
@@ -278,8 +291,8 @@ def lorenz_trajectory(X, sigma, beta, rho, start_time, end_time):
 
 def t4_fun_radial_trajectory(X: np.ndarray,
                              GRID_b: np.ndarray,
-                             epsilon,
-                             coefficients,
+                             epsilon: float,
+                             coefficients: np.ndarray,
                              start_time: float,
                              end_time: float) -> None:
     """
@@ -288,8 +301,8 @@ def t4_fun_radial_trajectory(X: np.ndarray,
     Args:
         X (np.ndarray): _description_
         GRID_b (np.ndarray): Grid points of radial basis
-        epsilon (_type_): parameter controlling peakedness of radial basis
-        coefficients (_type_): coefficients of model w.r.t. chosen basis
+        epsilon (float): parameter controlling peakedness of radial basis
+        coefficients (np.ndarray): coefficients of model w.r.t. chosen basis
         start_time (float): start of trajectory
         end_time (float): end of trajectory
     """
@@ -301,7 +314,9 @@ def t4_fun_radial_trajectory(X: np.ndarray,
 
     # integrate the Lorenz equations
     # xyz = odeint(lorenz, X, t, args = (sigma, beta, rho))
-    xyz = integrate.solve_ivp(fun_radial, t_span = [t[0], t[-1]], y0 = X, t_eval = t)
+    xyz = integrate.solve_ivp(fun_radial,
+                              t_span = [t[0], t[-1]],
+                              y0 = X, t_eval = t)
     xyz = xyz.y
 
     # plot the trajectory in three-dimensional phase space
