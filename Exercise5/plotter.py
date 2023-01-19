@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from utils import time_delay
+from utils import time_delay, t2_trajectory
 
 
 ############################# TASK 1 #############################
 
-def t1_basic_data_plot(X: np.ndarray, F: np.ndarray) -> None:
+def basic_data_plot_task1(X: np.ndarray, F: np.ndarray) -> None:
     """
     configures a basic plot and adds data.
 
@@ -22,9 +22,9 @@ def t1_basic_data_plot(X: np.ndarray, F: np.ndarray) -> None:
 
 ############################# TASK 2 #############################
 
-def plot_phase_portrait_linear(w: int, A: np.ndarray, x):
+def plot_phase_portrait_linear(w: int, A: np.ndarray):
     """
-    Plots a linear vector field in a streamplot, defined with
+    Plots phase portrait in a streamplot, defined with
     X and Y coordinates and the matrix A.
     """
     Y, X = np.mgrid[-w:w:100j, -w:w:100j]
@@ -37,36 +37,41 @@ def plot_phase_portrait_linear(w: int, A: np.ndarray, x):
     ax = plt.gca()
     ax.streamplot(X, Y, U, V, density=[1, 1])
     ax.set_aspect(1)
-    ax.plot(x[0,:], x[1,:], label="trajectory")
+    # ax.plot(x[0,:], x[1,:], label="trajectory")
 
-    ax.legend(loc='lower left')
+    # ax.legend(loc='lower left')
     ax.set_xlim(-10,10)
     ax.set_ylim(-10,10)
-    ax.set_title("the trajectory of initial point(10,10)")
+    ax.set_title("the phase portrait of Ax")
     ax.set_xlabel("coordinate 1")
     ax.set_ylabel("coordinate 2")
     return ax
 
+def plot_trajectory_with_phase_portrait_linear(w: int, 
+                                               A: np.ndarray, 
+                                               x0_point: np.ndarray, 
+                                               start_time: int, 
+                                               end_time: int):
+    """
+    Visualize the trajectory of start point x0_point with the phase portrait
+    """
+    x1_pre = t2_trajectory(x0_point, start_time, end_time, A)
+
+    ax = plot_phase_portrait_linear(w, A)
+    ax.plot(x1_pre[0,:], x1_pre[1,:], label="trajectory")
+    ax.set_title(f"the trajectory of {x0_point} with the phase portrait")
+
+    ax.legend(loc='lower left')
 
 ############################# TASK 3 #############################
 
-def t3_plot_points(*data: np.ndarray, fname: str = None) -> None:
-    """
-    Plots arbitrarily many datasets of two dimensional plots in one figure.
-    Each set of points gets a different color.
-    If filename is provided the figure is saved.
+def t3_plot_points(*data: np.ndarray) -> None:
 
-    Args:
-        *data (np.ndarray):
-        fname (str, optional): filename. Defaults to None.
-    """
     plt.figure(figsize=(5, 5))
     for xy_array in data:
         plt.scatter(xy_array[:, 0], xy_array[:, 1], s=2)
     plt.xlabel("coordinate 1")
     plt.ylabel("coordinate 2")
-    if fname != None:
-        plt.savefig(fname, bbox_inches='tight')
     plt.show()
 
 
@@ -90,97 +95,47 @@ def t3_plot_vector_fields(vec_field: np.ndarray,
 
 ############################# TASK 4 #############################
 
-def t4_takens(X: np.ndarray, delta_t: int, is_periodic = False) -> None:
+def t4_takens(X: np.ndarray, 
+              delta_t: np.ndarray, 
+              name: str, 
+              is_periodic = False) -> None:
     """
-    Plots the time shifted time-series data against itself
-    as done in the application of takens
+    Plots the specified coordinate against its delayed version with different delta_t
 
     Args:
-        X (np.ndarray): positions x(t), where t is the index
-        delta_t (int): offset of relative time shifts
-        is_periodic (bool, optional): specifies whether data is periodic.
-            Defaults to False.
+        X (np.ndarray): the specified coordinate
+        delta_t (np.ndarray): the delay time Delta t
+        name(str): name of the specified coordinate
     """
-    X, Y, Z = time_delay(X, delta_t, is_periodic)
+    # X, Y, Z = time_delay(X, delta_t, is_periodic)
 
-    fig = plt.figure(figsize=(20, 10))
+    # fig = plt.figure(figsize=(20, 10))
+    fig = plt.figure(figsize=(20, 5*len(delta_t)))
 
-    ax0 = fig.add_subplot(1, 2, 2)
-    ax1 = fig.add_subplot(1, 2, 1, projection='3d')
+    # ax1 = fig.add_subplot(1, 2, 1, projection='3d')
 
-    ax0.plot(X, Y)
-    ax0.set_xlabel("$x(t)$")
-    ax0.set_ylabel("$x(t - \Delta t)$")
-    ax0.grid(True)
+    # ax1.plot(X, Y, Z)
+    # ax1.set_xlabel("$x(t)$")
+    # ax1.set_ylabel("$x(t- \Delta t)$")
+    # ax1.set_zlabel("$x(t- 2\Delta t)$")
 
-    ax1.plot(X, Y, Z)
-    ax1.set_xlabel("$x(t)$")
-    ax1.set_ylabel("$x(t- \Delta t)$")
-    ax1.set_zlabel("$x(t- 2\Delta t)$")
+    for i in range(len(delta_t)):
+        x = time_delay(X, delta_t[i], is_periodic)
+        ax = fig.add_subplot(len(delta_t), 4, i+1, projection='3d')
+        ax.plot(x[0], x[1], x[2])
+        ax.set_xlabel(name + "$(t)$")
+        ax.set_ylabel(name + "$(t+ \Delta t)$")
+        ax.set_zlabel(name + "$(t+ 2\Delta t)$")
+        ax.set_title(f"$\Delta t ={delta_t[i]}$")
     plt.show()
 
 
-def t4_coordinate_vs_time(data: np.ndarray,
-                           time_values: np.ndarray,
-                           var_name: str,
-                           ax) -> None:
-    """
-    Plots coordinate data vs time
-
-    Args:
-        data (np.ndarray): coordinates
-        time_values (np.ndarray): time values associated with coordinates
-        var_name (str): name of coordinate used in plot
-        ax: Axes object of matplotlib
-    """
-    ax.set_xlabel("t")
-    ax.set_ylabel(var_name)
-    ax.set_title(f"plot the {var_name} against the line number")
-    # ax.scatter(X[:,0], X[:,1], s=1)
-    ax.plot(time_values, data)
-
-############################# TASK 5 #############################
-
-def plot_pca(x: np.ndarray,
-             u: np.ndarray,
-             window_shape: np.ndarray,
-             row: int, col: int) -> None:
-    """
-    Plots Principal component analysis based on different measurements taken in different areas.
-    """
-    fig, ax = plt.subplots(row, col, figsize=(row * 5, col * 5), subplot_kw=dict(projection='3d'))
-    for i in range(row):
-        for j in range(col):
-            ax[i][j].scatter(*x.T, s=1, c=u[:window_shape[0], row * i + j])
-    plt.show()
-
-
-def plot_arclength_velocities(vel: np.ndarray, arclength: np.ndarray) -> None:
-    """
-    Plots the velocity on archlength over arclength of the curve
-
-    Args:
-        vel (np.ndarray): velocity
-        time (np.ndarray): time
-    """
-    plt.rcParams["figure.figsize"] = (10, 5)
-    curve_arclength = 2 * np.pi / arclength.size * arclength
-    plt.plot(curve_arclength, vel)
-    plt.xlabel("arclength of the curve")
-    plt.ylabel("velocity on arclength")
-    plt.xticks([0, 6.28], ['0', '2π'], rotation='horizontal')
-    plt.show()
-
-
-def plot_vector_field(v_field: np.ndarray, arclength: np.ndarray) -> None:
-    """
-    Plots the vector field in each period
-
-    Args:
-        v_field: the vector field
-    """
-    plt.rcParams["figure.figsize"] = (10, 5)
-    plt.plot(arclength, v_field)
-    plt.xlabel("arclength")
-    plt.ylabel("vector field")
-    plt.show()
+# def t4_coordinate_vs_index(data: np.ndarray,
+#                            time_values: np.ndarray,
+#                            var_name: str,
+#                            ax) -> None:
+#     ax.set_xlabel("t")
+#     ax.set_ylabel(var_name)
+#     ax.set_title(f"plot the {var_name} against the line number")
+#     # ax.scatter(X[:,0], X[:,1], s=1)
+#     ax.plot(time_values, data)
