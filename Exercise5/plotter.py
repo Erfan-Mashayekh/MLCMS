@@ -5,7 +5,7 @@ from utils import time_delay, t2_trajectory
 
 ############################# TASK 1 #############################
 
-def basic_data_plot_task1(X: np.ndarray, F: np.ndarray) -> None:
+def t1_basic_data_plot(X: np.ndarray, F: np.ndarray) -> None:
     """
     configures a basic plot and adds data.
 
@@ -63,15 +63,27 @@ def plot_trajectory_with_phase_portrait_linear(w: int,
 
     ax.legend(loc='lower left')
 
+
+
 ############################# TASK 3 #############################
 
-def t3_plot_points(*data: np.ndarray) -> None:
+def t3_plot_points(*data: np.ndarray, fname: str = None) -> None:
+    """
+    Plots arbitrarily many datasets of two dimensional plots in one figure.
+    Each set of points gets a different color.
+    If filename is provided the figure is saved.
 
+    Args:
+        *data (np.ndarray):
+        fname (str, optional): filename. Defaults to None.
+    """
     plt.figure(figsize=(5, 5))
     for xy_array in data:
         plt.scatter(xy_array[:, 0], xy_array[:, 1], s=2)
     plt.xlabel("coordinate 1")
     plt.ylabel("coordinate 2")
+    if fname != None:
+        plt.savefig(fname, bbox_inches='tight')
     plt.show()
 
 
@@ -94,6 +106,7 @@ def t3_plot_vector_fields(vec_field: np.ndarray,
 
 
 ############################# TASK 4 #############################
+
 
 def t4_takens(X: np.ndarray, 
               delta_t: np.ndarray, 
@@ -129,13 +142,48 @@ def t4_takens(X: np.ndarray,
         ax.set_title(f"$\Delta t ={delta_t[i]}$")
     plt.show()
 
+############################# TASK 5 #############################
 
-# def t4_coordinate_vs_index(data: np.ndarray,
-#                            time_values: np.ndarray,
-#                            var_name: str,
-#                            ax) -> None:
-#     ax.set_xlabel("t")
-#     ax.set_ylabel(var_name)
-#     ax.set_title(f"plot the {var_name} against the line number")
-#     # ax.scatter(X[:,0], X[:,1], s=1)
-#     ax.plot(time_values, data)
+def plot_pca(x: np.ndarray,
+             u: np.ndarray,
+             window_shape: np.ndarray,
+             row: int, col: int) -> None:
+    """
+    Plots Principal component analysis based on different measurements taken in different areas.
+    """
+    fig, ax = plt.subplots(row, col, figsize=(row * 5, col * 5), subplot_kw=dict(projection='3d'))
+    for i in range(row):
+        for j in range(col):
+            ax[i][j].scatter(*x.T, s=1, c=u[:window_shape[0], row * i + j])
+    plt.show()
+
+
+def plot_arclength_velocities(vel: np.ndarray, arclength: np.ndarray) -> None:
+    """
+    Plots the velocity on archlength over arclength of the curve
+
+    Args:
+        vel (np.ndarray): velocity
+        time (np.ndarray): time
+    """
+    plt.rcParams["figure.figsize"] = (10, 5)
+    curve_arclength = 2 * np.pi / arclength.size * arclength
+    plt.plot(curve_arclength, vel)
+    plt.xlabel("arclength of the curve")
+    plt.ylabel("velocity on arclength")
+    plt.xticks([0, 6.28], ['0', '2π'], rotation='horizontal')
+    plt.show()
+
+
+def plot_vector_field(v_field: np.ndarray, arclength: np.ndarray) -> None:
+    """
+    Plots the vector field in each period
+
+    Args:
+        v_field: the vector field
+    """
+    plt.rcParams["figure.figsize"] = (10, 5)
+    plt.plot(arclength, v_field)
+    plt.xlabel("arclength")
+    plt.ylabel("vector field")
+    plt.show()
