@@ -200,9 +200,9 @@ def _lorenz(t: float,
     Args:
         t (float): time (dummy parameter)
         X (np.ndarray): initial condition
-        sigma (float): parameter TODO:!
-        beta (float): parameter
-        rho (float): parameter
+        sigma (float): parameter Prandtl number
+        beta (float): parameter a geometric factor
+        rho (float): parameter Rayleigh number
 
     Returns:
         np.ndarray: derivative of X w.r.t time
