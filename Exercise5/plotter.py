@@ -133,7 +133,7 @@ def plot_pca(x: np.ndarray,
     plt.show()
 
 
-def plot_arclength_velocities(vel: np.ndarray, time: np.ndarray) -> None:
+def plot_arclength_velocities(vel: np.ndarray, arclength: np.ndarray) -> None:
     """
     Plots the velocity on archlength over arclength of the curve
 
@@ -141,7 +141,7 @@ def plot_arclength_velocities(vel: np.ndarray, time: np.ndarray) -> None:
         vel:
     """
     plt.rcParams["figure.figsize"] = (10, 5)
-    curve_arclength = 2 * np.pi / vel.size * time
+    curve_arclength = 2 * np.pi / arclength.size * arclength
     plt.plot(curve_arclength, vel)
     plt.xlabel("arclength of the curve")
     plt.ylabel("velocity on arclength")
@@ -149,7 +149,7 @@ def plot_arclength_velocities(vel: np.ndarray, time: np.ndarray) -> None:
     plt.show()
 
 
-def plot_vector_field(v_field: np.ndarray, time: np.ndarray) -> None:
+def plot_vector_field(v_field: np.ndarray, arclength: np.ndarray) -> None:
     """
     Plots the vector field in each period
 
@@ -157,7 +157,7 @@ def plot_vector_field(v_field: np.ndarray, time: np.ndarray) -> None:
         v_field:
     """
     plt.rcParams["figure.figsize"] = (10, 5)
-    plt.plot(time, v_field)
-    plt.xlabel("time")
+    plt.plot(arclength, v_field)
+    plt.xlabel("arclength")
     plt.ylabel("vector field")
     plt.show()
