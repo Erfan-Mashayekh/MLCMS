@@ -163,3 +163,118 @@ def solve_ivp_implicit(matrix, x, dt):
 def compute_error(x, x_predicted):
     return np.mean(np.linalg.norm(x-x_predicted, axis=0)**2 / x.shape[0])
 
+
+############################# TASK 4 #############################
+
+def time_delay(X: np.ndarray, delta_t: int, is_periodic = False):
+    """
+    apply time delay multiple times
+    Args:
+        X (np.ndarray): Data array of coordinate we want to do time-delay embeding
+        delta_t (float): the delay time Delta t
+        TODO:
+    Returns:
+        np.ndarray: (x(t), x(t + Delta t), x(t + Delta t))
+    """
+    if is_periodic:
+        x1 = X
+        x2 = np.roll(X, - delta_t)
+        x3 = np.roll(X, - 2 * delta_t)
+    else:
+        x1 = X[:X.shape[0] - 2*delta_t]
+        x2 = X[delta_t:X.shape[0] - delta_t]
+        x3 = X[2*delta_t:]
+
+    out = np.array([x1, x2, x3])
+    return out
+
+
+def _lorenz(t: float,
+           X: np.ndarray,
+           sigma: float,
+           beta: float,
+           rho: float) -> np.ndarray:
+    """
+    define the Lorenz equations
+    TODO:
+    Args:
+        t (float): time (dummy parameter)
+        X (np.ndarray): initial condition
+        sigma (float): parameter TODO:!
+        beta (float): parameter
+        rho (float): parameter
+
+    Returns:
+        np.ndarray: derivative of X w.r.t time
+    """
+    x, y, z = X
+
+    dx_dt = sigma * (y - x)
+    dy_dt = x * (rho - z) - y
+    dz_dt = x * y - beta * z
+
+    dX_dt = [dx_dt, dy_dt, dz_dt]
+
+    return dX_dt
+
+
+def lorenz_trajectory(X, sigma, beta, rho, start_time, end_time):
+    """
+    integrate $x,y,z$ with respect to $t$ by \emph{solve_ivp} and plot the trajectory.
+    :param X: the initial condition
+    :param sigma, beta, rho: Lorenz parameters
+    :param linewidth: the width of line in plot
+    """
+    t = np.linspace(start_time, end_time, 10000)
+
+    # integrate the Lorenz equations
+    # xyz = odeint(lorenz, X, t, args = (sigma, beta, rho))
+    xyz = integrate.solve_ivp(_lorenz, t_span = [t[0], t[-1]], y0 = X, t_eval = t, args = (sigma, beta, rho))
+    xyz = xyz["y"]
+
+    # plot the trajectory in three-dimensional phase space
+    fig = plt.figure(figsize=(10, 10))
+    ax1 = fig.add_subplot(projection='3d')
+    ax1.plot(xyz[0, :], xyz[1, :], xyz[2, :], label="trajectory")
+    ax1.set_xlabel("x")
+    ax1.set_ylabel("y")
+    ax1.set_zlabel("z")
+    ax1.legend()
+    ax1.set_title(fr"$\sigma={sigma}, \beta={round(beta,2)}, \rho={rho}, X_0=[{X[0]}, {X[1]}, {X[2]}]$")
+    plt.show()
+    return xyz
+
+
+def t4_fun_radial_trajectory(X: np.ndarray,
+                             GRID_b: np.ndarray,
+                             epsilon,
+                             coefficients,
+                             start_time: float,
+                             end_time: float) -> None:
+    """
+    TODO:
+    integrate $x,y,z$ with respect to t by solve_ivp and plot the trajectory.
+    :param X: the initial condition
+    :param GRID_b, EPSILON, coefficients: Radial Basis paramters
+    """
+    t = np.linspace(start_time, end_time, 10000)
+
+    def fun_radial(t, y):
+        y = y.reshape((1, y.size))
+        return radial_basis(y, GRID_b, epsilon) @ coefficients
+
+    # integrate the Lorenz equations
+    # xyz = odeint(lorenz, X, t, args = (sigma, beta, rho))
+    xyz = integrate.solve_ivp(fun_radial, t_span = [t[0], t[-1]], y0 = X, t_eval = t)
+    xyz = xyz.y
+
+    # plot the trajectory in three-dimensional phase space
+    fig = plt.figure(figsize=(10, 10))
+    ax1 = fig.add_subplot(projection='3d')
+    ax1.plot(xyz[0, :], xyz[1, :], xyz[2, :], label="trajectory")
+    ax1.plot(xyz[0, 0], xyz[1, 0], xyz[2, 0], 'o', color="r", label="initial point")
+    ax1.set_xlabel("x()")
+    ax1.set_ylabel("$x(t + /Delta t)$")
+    ax1.set_zlabel("$x(t + 2*/Delta t)$")
+    ax1.legend()
+    ax1.set_title("trajectories of the training")

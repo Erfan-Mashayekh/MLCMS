@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.gridspec as gridspec
+from utils import time_delay
+
 
 ############################# TASK 1 #############################
 
@@ -17,6 +18,7 @@ def basic_data_plot_task1(X: np.ndarray, F: np.ndarray) -> None:
     plt.ylabel(r"$f(x)$")
     plt.legend()
     plt.grid(True)
+
 
 ############################# TASK 3 #############################
 
@@ -45,6 +47,7 @@ def plot_phase_portrait_linear(w: int, A: np.ndarray, x):
     ax.set_ylabel("coordinate 2")
     return ax
 
+
 ############################# TASK 3 #############################
 
 def t3_plot_points(*data: np.ndarray) -> None:
@@ -59,7 +62,8 @@ def t3_plot_points(*data: np.ndarray) -> None:
 
 def t3_plot_vector_fields(vec_field: np.ndarray,
                           pos: np.ndarray,
-                          ax, title: str):
+                          ax,
+                          title: str):
     """
     Plots a non-linear vector fields, defined with X and Y coordinates
     and the derivatives U and V.
@@ -72,3 +76,41 @@ def t3_plot_vector_fields(vec_field: np.ndarray,
     ax.set_xlabel("coordinate 1")
     ax.set_ylabel("coordinate 2")
     return ax
+
+
+############################# TASK 4 #############################
+
+def t4_takens(X: np.ndarray, delta_t: int, is_periodic = False) -> None:
+    """TODO:
+
+    Args:
+        X (np.ndarray): _description_
+    """
+    X, Y, Z = time_delay(X, delta_t, is_periodic)
+
+    fig = plt.figure(figsize=(20, 10))
+
+    ax0 = fig.add_subplot(1, 2, 2)
+    ax1 = fig.add_subplot(1, 2, 1, projection='3d')
+
+    ax0.plot(X, Y)
+    ax0.set_xlabel("$x(t)$")
+    ax0.set_ylabel("$x(t - \Delta t)$")
+    ax0.grid(True)
+
+    ax1.plot(X, Y, Z)
+    ax1.set_xlabel("$x(t)$")
+    ax1.set_ylabel("$x(t- \Delta t)$")
+    ax1.set_zlabel("$x(t- 2\Delta t)$")
+    plt.show()
+
+
+def t4_coordinate_vs_index(data: np.ndarray,
+                           time_values: np.ndarray,
+                           var_name: str,
+                           ax) -> None:
+    ax.set_xlabel("t")
+    ax.set_ylabel(var_name)
+    ax.set_title(f"plot the {var_name} against the line number")
+    # ax.scatter(X[:,0], X[:,1], s=1)
+    ax.plot(time_values, data)
