@@ -273,7 +273,7 @@ def t4_fun_radial_trajectory(X: np.ndarray,
     ax1 = fig.add_subplot(projection='3d')
     ax1.plot(xyz[0, :], xyz[1, :], xyz[2, :], label="trajectory")
     ax1.plot(xyz[0, 0], xyz[1, 0], xyz[2, 0], 'o', color="r", label="initial point")
-    ax1.set_xlabel("x()")
+    ax1.set_xlabel("$x(t)$")
     ax1.set_ylabel("$x(t + /Delta t)$")
     ax1.set_zlabel("$x(t + 2*/Delta t)$")
     ax1.legend()
