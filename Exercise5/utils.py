@@ -162,8 +162,21 @@ def solve_ivp_implicit(matrix, x, dt):
 
     return sol.T
 
-def compute_error(x, x_predicted):
-    return np.mean(np.linalg.norm(x-x_predicted, axis=0)**2 / x.shape[0])
+def compute_mse(x1: np.ndarray, x2: np.ndarray) -> float:
+    """
+    Computes the mean squared error between to arrays
+    Assumes that 0 is the batch axis and 1 is the instance axis
+
+    Args:
+        x1 (np.ndarray): shape (N, dim)
+        x2 (np.ndarray): shape (N, dim)
+
+    Returns:
+        float: MSE Error
+    """
+    N = x1.shape[0]
+    return np.sum((x1 - x2)**2)  / N
+    # return np.mean(np.linalg.norm(x-x_predicted, axis=0)**2 / x.shape[0])
 
 
 ############################# TASK 4 #############################

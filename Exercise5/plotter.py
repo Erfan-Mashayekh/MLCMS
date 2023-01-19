@@ -50,13 +50,15 @@ def plot_phase_portrait_linear(w: int, A: np.ndarray, x):
 
 ############################# TASK 3 #############################
 
-def t3_plot_points(*data: np.ndarray) -> None:
+def t3_plot_points(*data: np.ndarray, fname: str = None) -> None:
 
     plt.figure(figsize=(5, 5))
     for xy_array in data:
         plt.scatter(xy_array[:, 0], xy_array[:, 1], s=2)
     plt.xlabel("coordinate 1")
     plt.ylabel("coordinate 2")
+    if fname != None:
+        plt.savefig(fname, bbox_inches='tight')
     plt.show()
 
 
