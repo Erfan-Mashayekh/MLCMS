@@ -172,7 +172,6 @@ def time_delay(X: np.ndarray, delta_t: int, is_periodic = False):
     Args:
         X (np.ndarray): Data array of coordinate we want to do time-delay embeding
         delta_t (float): the delay time Delta t
-        TODO:
     Returns:
         np.ndarray: (x(t), x(t + Delta t), x(t + Delta t))
     """
@@ -252,8 +251,7 @@ def t4_fun_radial_trajectory(X: np.ndarray,
                              start_time: float,
                              end_time: float) -> None:
     """
-    TODO:
-    integrate $x,y,z$ with respect to t by solve_ivp and plot the trajectory.
+    Solve the system for (x(t),x(t+delta t),x(t+2*delta t)) with respect to t by solve_ivp and plot the trajectory.
     :param X: the initial condition
     :param GRID_b, EPSILON, coefficients: Radial Basis paramters
     """
