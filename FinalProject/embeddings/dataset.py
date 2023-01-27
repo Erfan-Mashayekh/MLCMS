@@ -50,5 +50,5 @@ class Dataset:
         """
         fig = plt.figure(figsize=[7, 7])
         ax = fig.add_subplot(1, 1, 1, projection="3d")
-        ax.scatter(*positions.T, c=positions_color, cmap=plt.cm.Spectral)
+        ax.scatter(*positions.T, c=positions_color, cmap=plt.cm.Spectral, s=0.5)
         ax.set_title("Swiss roll: sampled manifold point cloud")
