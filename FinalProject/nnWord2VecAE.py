@@ -14,30 +14,44 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # class ResidualLayer:
 
+class Residual(nn.Module):
+    def __init__(self, features: int, activation = nn.ELU) -> None:
+        super().__init__()
+        self.res = nn.Sequential(
+                nn.Linear(features, features),
+                activation()
+            )
+
+    def forward(self, x: Tensor) -> Tensor:
+        return x + self.res(x)
+
 
 class Encoder(nn.Module):
     def __init__(self, n_in: int, latent_dim: int) -> None:
         super().__init__()
         activation = nn.ELU
-        n_hidden = 256
+        n_hidden = 512
         self.net = nn.Sequential(
                 nn.Linear(n_in, n_hidden),
                 activation(),
                 nn.Linear(n_hidden, n_hidden),
                 activation(),
                 nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, latent_dim)
+                activation()
             )
+        self.residual = nn.Sequential(
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden)
+            )
+        self.final = nn.Linear(n_hidden, latent_dim)
 
     def forward(self, x: Tensor) -> Tensor:
         x = self.net(x)
+        x = self.residual(x)
+        x = self.final(x)
         return x
 
 
@@ -45,30 +59,33 @@ class Decoder(nn.Module):
     def __init__(self, n_out: int, latent_dim: int) -> None:
         super().__init__()
         activation = nn.ELU
-        n_hidden = 256
+        n_hidden = 512
         self.net = nn.Sequential(
                 nn.Linear(latent_dim, n_hidden),
                 activation(),
                 nn.Linear(n_hidden, n_hidden),
                 activation(),
                 nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_out)
+                activation()
             )
+        self.residual = nn.Sequential(
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden)
+            )
+        self.final = nn.Linear(n_hidden, n_out)
 
     def forward(self, x: Tensor) -> Tensor:
         x = self.net(x)
+        x = self.residual(x)
+        x = self.final(x)
         return x
 
 
-class Autoencoder(pl.LightningModule):
-    example_input_array = Tensor([1.0, 1.5, 2.5])
+class Word2VecAutoencoder(pl.LightningModule):
+    example_input_array = torch.ones(300)
 
     def __init__(self,
                  n_in: int,
@@ -95,31 +112,28 @@ class Autoencoder(pl.LightningModule):
                         factor=0.2,
                         patience=20,
                         min_lr=5e-5)
-        # TODO: what does this return
         out = {"optimizer": optimizer,
                "lr_scheduler": scheduler,
-               "monitor": "val_loss"}
+               "monitor": "compression_loss"}
         return out
 
     def training_step(self, batch, batch_idx) -> Tensor:
         loss =  self._reconstruction_loss(batch)
         loss += self._l2_regularization()
-        self.log("train_loss", loss)
+        self.log("compression_loss", loss)
         return loss
 
-    def validation_step(self, batch, batch_idx) -> None:
-        loss = self._reconstruction_loss(batch)
-        self.log("val_loss", loss)
-
-    def test_step(self, batch, batch_idx) -> None:
-        loss = self._reconstruction_loss(batch)
-        self.log("test_loss", loss)
+    def test_step(self, batch, batch_idx) -> Tensor:
+        loss =  self._reconstruction_loss(batch)
+        self.log("final_loss", loss)
+        return loss
 
     def _l2_regularization(self, reg_strength=0.001):
         out = sum(torch.square(p).sum() for p in self.parameters())
         return reg_strength * out
 
     def _l1_regularization(self, reg_strength=0.001):
+        # TODO: Remove
         out = sum(torch.abs(p).sum() for p in self.parameters())
         return reg_strength * out
 

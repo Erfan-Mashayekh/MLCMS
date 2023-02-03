@@ -14,6 +14,17 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # class ResidualLayer:
 
+class Residual(nn.Module):
+    def __init__(self, features: int, activation = nn.ELU) -> None:
+        super().__init__()
+        self.res = nn.Sequential(
+                nn.Linear(features, features),
+                activation()
+            )
+
+    def forward(self, x: Tensor) -> Tensor:
+        return x + self.res(x)
+
 
 class Encoder(nn.Module):
     def __init__(self, n_in: int, latent_dim: int) -> None:
@@ -26,18 +37,22 @@ class Encoder(nn.Module):
                 nn.Linear(n_hidden, n_hidden),
                 activation(),
                 nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, latent_dim)
+                activation()
             )
+        self.residual = nn.Sequential(
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden)
+            )
+        self.final = nn.Linear(n_hidden, latent_dim)
 
     def forward(self, x: Tensor) -> Tensor:
         x = self.net(x)
+        x = self.residual(x)
+        x = self.final(x)
         return x
 
 
@@ -52,22 +67,26 @@ class Decoder(nn.Module):
                 nn.Linear(n_hidden, n_hidden),
                 activation(),
                 nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_out)
+                activation()
             )
+        self.residual = nn.Sequential(
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden),
+                Residual(n_hidden)
+            )
+        self.final = nn.Linear(n_hidden, n_out)
 
     def forward(self, x: Tensor) -> Tensor:
         x = self.net(x)
+        x = self.residual(x)
+        x = self.final(x)
         return x
 
 
-class Autoencoder(pl.LightningModule):
+class TestAutoencoder(pl.LightningModule):
     example_input_array = Tensor([1.0, 1.5, 2.5])
 
     def __init__(self,

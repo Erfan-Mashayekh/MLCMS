@@ -18,22 +18,20 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Encoder(nn.Module):
     def __init__(self, n_in: int, latent_dim: int) -> None:
         super().__init__()
-        activation = nn.ELU
-        n_hidden = 256
         self.net = nn.Sequential(
-                nn.Linear(n_in, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, latent_dim)
+                nn.Linear(n_in, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, latent_dim)
             )
 
     def forward(self, x: Tensor) -> Tensor:
@@ -44,22 +42,20 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, n_out: int, latent_dim: int) -> None:
         super().__init__()
-        activation = nn.ELU
-        n_hidden = 256
         self.net = nn.Sequential(
-                nn.Linear(latent_dim, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_hidden),
-                activation(),
-                nn.Linear(n_hidden, n_out)
+                nn.Linear(latent_dim, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, 256),
+                nn.ELU(),
+                nn.Linear(256, n_out)
             )
 
     def forward(self, x: Tensor) -> Tensor:
@@ -67,23 +63,27 @@ class Decoder(nn.Module):
         return x
 
 
-class Autoencoder(pl.LightningModule):
+class TopologicalAutoencoder(pl.LightningModule):
     example_input_array = Tensor([1.0, 1.5, 2.5])
 
     def __init__(self,
-                 n_in: int,
-                 n_out: int,
+                 data_dim: int,
                  latent_dim: int) -> None:
         super().__init__()
 
         # Saving hyperparameters of autoencoder
         self.save_hyperparameters()
 
-        self.encoder = Encoder(n_in, latent_dim)
-        self.decoder = Decoder(n_out, latent_dim)
+        self.encoder = Encoder(data_dim, latent_dim)
+        self.decoder = Decoder(data_dim, latent_dim)
+
+        self.N_dist = torch.distributions.Normal(0, 1)
+        self.N_dist.loc = self.N_dist.loc.to(DEVICE)
+        self.N_dist.scale = self.N_dist.scale.to(DEVICE)
 
     def forward(self, x: Tensor) -> Tensor:
         z = self.encoder(x)
+        z += 0.2 * self.N_dist.sample(z.shape)
         x_hat = self.decoder(z)
         return x_hat
 
@@ -102,9 +102,9 @@ class Autoencoder(pl.LightningModule):
         return out
 
     def training_step(self, batch, batch_idx) -> Tensor:
-        loss =  self._reconstruction_loss(batch)
-        loss += self._l2_regularization()
+        loss = self._reconstruction_loss(batch)
         self.log("train_loss", loss)
+        loss += self._reconstruction_loss(batch)
         return loss
 
     def validation_step(self, batch, batch_idx) -> None:
@@ -115,11 +115,11 @@ class Autoencoder(pl.LightningModule):
         loss = self._reconstruction_loss(batch)
         self.log("test_loss", loss)
 
-    def _l2_regularization(self, reg_strength=0.001):
+    def _l2_regularisation(self, reg_strength=0.001):
         out = sum(torch.square(p).sum() for p in self.parameters())
         return reg_strength * out
 
-    def _l1_regularization(self, reg_strength=0.001):
+    def _l1_regularisation(self, reg_strength=0.001):
         out = sum(torch.abs(p).sum() for p in self.parameters())
         return reg_strength * out
 
@@ -130,4 +130,3 @@ class Autoencoder(pl.LightningModule):
         loss = nn.functional.mse_loss(x, x_hat, reduction="none")
         loss = loss.sum(dim=1).mean(dim=[0])  # batch dim: 0, data dim: 1
         return loss
-

@@ -22,11 +22,11 @@ def get_data_loaders(data: Dataset | Tensor,
                             batch_size=batch_size,
                             num_workers=num_workers,
                             shuffle=True)
-    val_loader  = DataLoader(train_set,
+    val_loader  = DataLoader(val_set,
                             batch_size=batch_size,
                             num_workers=num_workers,
                             shuffle=False)
-    test_loader = DataLoader(train_set,
+    test_loader = DataLoader(test_set,
                             batch_size=batch_size,
                             num_workers=num_workers,
                             shuffle=False)
