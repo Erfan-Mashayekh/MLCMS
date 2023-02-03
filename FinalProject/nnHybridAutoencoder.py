@@ -66,28 +66,28 @@ class Encoder(pl.LightningModule):
         return out
 
     def training_step(self, batch, batch_idx) -> Tensor:
-        loss =  self._reconstruction_loss(batch)
+        loss =  self._loss(batch)
         loss += self._l2_regularization()
         self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx) -> None:
-        loss = self._reconstruction_loss(batch)
+        loss = self._loss(batch)
         self.log("val_loss", loss)
 
     def test_step(self, batch, batch_idx) -> None:
-        loss = self._reconstruction_loss(batch)
+        loss = self._loss(batch)
         self.log("test_loss", loss)
 
     def _l2_regularization(self, reg_strength=0.001):
         out = sum(torch.square(p).sum() for p in self.parameters())
         return reg_strength * out
 
-    def _reconstruction_loss(self, batch):
+    def _loss(self, batch):
         # TODO: Check Loss function
-        x = batch
-        x_hat = self.forward(x)
-        loss = nn.functional.mse_loss(x, x_hat, reduction="none")
+        x, y = batch
+        y_hat = self.forward(x)
+        loss = nn.functional.mse_loss(y, y_hat, reduction="none")
         loss = loss.sum(dim=1).mean(dim=[0])  # batch dim: 0, data dim: 1
         return loss
 

@@ -13,6 +13,7 @@ from nnTopologicalAutoencoder import TopologicalAutoencoder
 
 from nnPlay import TestAutoencoder
 from nnWord2VecAE import Word2VecAutoencoder
+from nnHybridAutoencoder import Encoder as HybridEncoder
 
 from typing import Tuple, Dict
 
@@ -20,6 +21,17 @@ from typing import Tuple, Dict
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 LOG_DIR = os.path.join(os.getcwd(), "training_logs")
 TENSORBOARD_LOG_DIR = os.path.join(os.getcwd(), "tensorboard/")
+
+
+def train_embedding(train_loader: DataLoader,
+                      val_loader:   DataLoader,
+                      test_loader:  DataLoader,
+                      latent_dim: int,
+                      data_dim: int,
+                      title = "Encoder"
+                      ) -> Tuple[Autoencoder, Dict]:
+    model = HybridEncoder(data_dim, latent_dim).to(DEVICE)
+    return _train_swiss_roll(model, train_loader, val_loader, test_loader, title)
 
 
 def train_autoencoder_swiss_roll(train_loader: DataLoader,

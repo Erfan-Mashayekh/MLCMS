@@ -3,6 +3,21 @@ from torch import Tensor
 from torch.utils.data import Dataset, DataLoader, random_split
 
 from typing import Tuple
+from numpy import ndarray
+
+class EmbeddingDataset(Dataset):
+    def __init__(self, X: ndarray, Z: ndarray) -> None:
+        assert X.shape[0] == Z.shape[0]
+        self.X = Tensor(X)
+        self.Z = Tensor(Z)
+
+    def __len__(self):
+        return self.X.shape[0]
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+        return self.X[idx], self.Z[idx]
 
 
 def get_data_loaders(data: Dataset | Tensor,
@@ -13,7 +28,7 @@ def get_data_loaders(data: Dataset | Tensor,
                      num_workers=8
                      ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     assert train_ratio + val_ratio + test_ratio == 1
-    n = data.shape[0]
+    n = len(data)
     n_train =   int(n * train_ratio)
     n_val =     int(n * val_ratio)
     n_test =    int(n * test_ratio)
@@ -31,4 +46,3 @@ def get_data_loaders(data: Dataset | Tensor,
                             num_workers=num_workers,
                             shuffle=False)
     return train_loader, val_loader, test_loader
-
