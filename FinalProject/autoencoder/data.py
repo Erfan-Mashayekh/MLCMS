@@ -48,7 +48,8 @@ def get_data_loaders(data: Dataset | Tensor,
                      train_ratio= 0.7,
                      val_ratio  = 0.15,
                      test_ratio = 0.15,
-                     num_workers=8
+                     num_workers=8,
+                     normalize=True
                      ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     """
     Creates train, validation and training dataloader given a Tensor or Dataset
@@ -66,7 +67,7 @@ def get_data_loaders(data: Dataset | Tensor,
         Tuple[DataLoader, DataLoader, DataLoader]: (train, validation, test)
     """
     assert train_ratio + val_ratio + test_ratio == 1
-    if type(data) == Tensor:
+    if type(data) == Tensor and normalize:
         data = normalize_data(data)
     n = len(data)
     n_train =   int(n * train_ratio)

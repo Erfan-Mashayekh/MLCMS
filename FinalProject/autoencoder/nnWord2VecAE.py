@@ -1,29 +1,11 @@
-"""
-Inspired by https://pytorch-lightning.readthedocs.io/en/stable/notebooks/course_UvA-DL/08-deep-autoencoders.html
-"""
-
 import torch
-import pytorch_lightning as pl
-
 import torch.nn as nn
-from torch import optim, Tensor
+from torch import Tensor, optim
+
+import nnBase
+from nnBase import Residual
 
 from typing import Any
-
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-# class ResidualLayer:
-
-class Residual(nn.Module):
-    def __init__(self, features: int, activation = nn.ELU) -> None:
-        super().__init__()
-        self.res = nn.Sequential(
-                nn.Linear(features, features),
-                activation()
-            )
-
-    def forward(self, x: Tensor) -> Tensor:
-        return x + self.res(x)
 
 
 class Encoder(nn.Module):
@@ -84,7 +66,7 @@ class Decoder(nn.Module):
         return x
 
 
-class Word2VecAutoencoder(pl.LightningModule):
+class Word2VecAutoencoder(nnBase.BaseSR):
     example_input_array = torch.ones(300)
 
     def __init__(self,
@@ -118,27 +100,17 @@ class Word2VecAutoencoder(pl.LightningModule):
         return out
 
     def training_step(self, batch, batch_idx) -> Tensor:
-        loss =  self._reconstruction_loss(batch)
+        loss =  self._loss(batch)
         loss += self._l2_regularization()
         self.log("compression_loss", loss)
         return loss
 
     def test_step(self, batch, batch_idx) -> Tensor:
-        loss =  self._reconstruction_loss(batch)
+        loss =  self._loss(batch)
         self.log("final_loss", loss)
         return loss
 
-    def _l2_regularization(self, reg_strength=0.001):
-        out = sum(torch.square(p).sum() for p in self.parameters())
-        return reg_strength * out
-
-    def _l1_regularization(self, reg_strength=0.001):
-        # TODO: Remove
-        out = sum(torch.abs(p).sum() for p in self.parameters())
-        return reg_strength * out
-
-    def _reconstruction_loss(self, batch):
-        # TODO: Check Loss function
+    def _loss(self, batch):
         x = batch
         x_hat = self.forward(x)
         loss = nn.functional.mse_loss(x, x_hat, reduction="none")

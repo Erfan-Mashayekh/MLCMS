@@ -84,12 +84,23 @@ class Decoder(nnBase.BaseSR):
 class PretrainedAE(nnBase.BaseSR):
     """
     Pretrained autoencoder used to learn embedding of Swiss Roll
-    assumes input dimension of 3 and 2D latent space
+    assumes input dimension of 3 and 2D latent space.
+
+    Child class of nn.Module -> pl.LightningModule -> BaseSR
     """
-    def __init__(self, encoder_path: str, decoder_path = None) -> None:
+    def __init__(self,
+                 encoder_path: str,
+                 decoder_path = None) -> None:
+        """
+        Args:
+            encoder_path (str): path to encoder checkpoint from which to
+                load weights
+            decoder_path (_type_, optional): path to decoder checkpoint.
+                if None then default initialize. Defaults to None.
+        """
         super().__init__()
         self.encoder = Encoder.load_from_checkpoint(encoder_path)
-        for param in self.encoder.parameters():
+        for param in self.encoder.parameters(): # freeze encoder params
             param.requires_grad = False
 
         if decoder_path == None:
@@ -112,3 +123,12 @@ class PretrainedAE(nnBase.BaseSR):
         loss = nn.functional.mse_loss(x, x_hat, reduction="none")
         loss = loss.sum(dim=1).mean(dim=[0])  # batch dim: 0, data dim: 1
         return loss
+
+    def unfreeze_encoder(self) -> None:
+        """
+        Unfreezes the encoder parameters for training and reduces the
+        learning rate.
+        """
+        self.learning_rate = 1e-5
+        for param in self.encoder.parameters():
+            param.requires_grad = True

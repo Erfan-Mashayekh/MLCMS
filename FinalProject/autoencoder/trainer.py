@@ -76,9 +76,11 @@ def _train_swiss_roll(model: pl.LightningModule,
         devices=1,
         max_epochs=1000,
         callbacks=[
-            ModelCheckpoint(save_weights_only=True),
-            EarlyStopping(monitor="val_loss", patience=25, mode="min")
-            # TODO: LearningRateMonitor("epoch")
+            ModelCheckpoint(monitor="val_loss",
+                            save_weights_only=True,
+                            every_n_epochs=1),
+            EarlyStopping(monitor="val_loss", patience=50, mode="min"),
+            LearningRateMonitor("epoch")
         ],
         logger=logger,
         log_every_n_steps=1
@@ -105,7 +107,9 @@ def _train_word2vec(model: pl.LightningModule,
         devices=1,
         max_epochs=200,
         callbacks=[
-            ModelCheckpoint(save_weights_only=True),
+            ModelCheckpoint(monitor="val_loss",
+                            save_weights_only=True,
+                            every_n_epochs=1),
             EarlyStopping(monitor="compression_loss", patience=3,
                           mode="min", min_delta=0.0015, verbose=False),
             LearningRateMonitor("epoch")

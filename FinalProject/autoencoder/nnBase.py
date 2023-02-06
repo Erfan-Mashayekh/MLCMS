@@ -18,6 +18,8 @@ class Residual(nn.Module):
 
 
 class BaseSR(pl.LightningModule):
+    reg_strength = 0.001
+    learning_rate = 1e-3
     def __init__(self) -> None:
         super().__init__()
 
@@ -26,7 +28,7 @@ class BaseSR(pl.LightningModule):
         raise NotImplementedError()
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(
                         optimizer,
                         mode="min",
@@ -52,7 +54,7 @@ class BaseSR(pl.LightningModule):
         loss = self._loss(batch)
         self.log("test_loss", loss)
 
-    def _l2_regularization(self, reg_strength=0.001):
+    def _l2_regularization(self):
         """
         Computes the L2 regularization term to be added to the loss
 
@@ -60,11 +62,14 @@ class BaseSR(pl.LightningModule):
             reg_strength (float, optional): Defaults to 0.005.
         """
         out = sum(torch.square(p).sum() for p in self.parameters())
-        return reg_strength * out
+        return self.reg_strength * out
 
-    def _l1_regularization(self, reg_strength=0.001):
+    def _l1_regularization(self):
         out = sum(torch.abs(p).sum() for p in self.parameters())
-        return reg_strength * out
+        return self.reg_strength * out
+
+    def turn_off_regularization(self):
+        self.reg_strength = 0
 
     @abstractmethod
     def _loss(self, batch):
