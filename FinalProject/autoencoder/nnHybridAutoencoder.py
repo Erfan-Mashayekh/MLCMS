@@ -5,10 +5,11 @@ import torch.nn as nn
 from torch import Tensor
 from typing import Any
 
-from nnModules import Residual, BaseSR
+import nnBase
+from nnBase import Residual
 
 
-class Encoder(BaseSR):
+class Encoder(nnBase.BaseSR):
     def __init__(self, n_in: int, latent_dim: int) -> None:
         super().__init__()
         activation = nn.ELU
@@ -44,7 +45,7 @@ class Encoder(BaseSR):
         return loss
 
 
-class Decoder(BaseSR):
+class Decoder(nnBase.BaseSR):
     def __init__(self, n_out: int, latent_dim: int) -> None:
         super().__init__()
         activation = nn.ELU
@@ -80,7 +81,11 @@ class Decoder(BaseSR):
         return loss
 
 
-class PretrainedAE(BaseSR):
+class PretrainedAE(nnBase.BaseSR):
+    """
+    Pretrained autoencoder used to learn embedding of Swiss Roll
+    assumes input dimension of 3 and 2D latent space
+    """
     def __init__(self, encoder_path: str, decoder_path = None) -> None:
         super().__init__()
         self.encoder = Encoder.load_from_checkpoint(encoder_path)
@@ -96,7 +101,6 @@ class PretrainedAE(BaseSR):
     def forward(self, x: Tensor) -> Tensor:
         z = self.encoder(x)
         x_hat = self.decoder(z)
-        # x_hat = self.residual(x_hat)
         return x_hat
 
     def _loss(self, batch):

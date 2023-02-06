@@ -10,7 +10,6 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from nnAutoencoder import Autoencoder
 from nnWord2VecAE import Word2VecAutoencoder
 from nnHybridAutoencoder import Encoder as HybridEncoder
-from nnHybridAutoencoder import PretrainedAE
 from nnHybridAutoencoder import Decoder as HybridDecoder
 
 from typing import Tuple, Dict
@@ -90,8 +89,7 @@ def _train_swiss_roll(model: pl.LightningModule,
 
     # Test best model on validation and test set
     val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
-    # test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
-    # result = {"test": test_result, "val": val_result}
+
     result = {"val": val_result}
     return model, result
 

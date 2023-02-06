@@ -1,25 +1,19 @@
 """
 Inspired by https://pytorch-lightning.readthedocs.io/en/stable/notebooks/course_UvA-DL/08-deep-autoencoders.html
 """
-
-import torch
-import pytorch_lightning as pl
-
 import torch.nn as nn
-from torch import optim, Tensor
+from torch import Tensor
 
-from typing import Any
-
-from nnModules import BaseSR
-
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+import nnBase
 
 
 class Encoder(nn.Module):
-    def __init__(self, n_in: int, latent_dim: int) -> None:
+    def __init__(self,
+                 n_in: int,
+                 latent_dim: int,
+                 n_hidden: int,
+                 activation: nn.Module) -> None:
         super().__init__()
-        activation = nn.ELU
-        n_hidden = 256
         self.net = nn.Sequential(
                 nn.Linear(n_in, n_hidden),
                 activation(),
@@ -42,10 +36,12 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, n_out: int, latent_dim: int) -> None:
+    def __init__(self,
+                 n_out: int,
+                 latent_dim: int,
+                 n_hidden: int,
+                 activation: nn.Module) -> None:
         super().__init__()
-        activation = nn.ELU
-        n_hidden = 256
         self.net = nn.Sequential(
                 nn.Linear(latent_dim, n_hidden),
                 activation(),
@@ -67,7 +63,7 @@ class Decoder(nn.Module):
         return x
 
 
-class OldAutoencoder(BaseSR):
+class OldAutoencoder(nnBase.BaseSR):
     """
     Old architecture trained on un-normalized data.
     Needed for loading best observed model from checkpoint.
@@ -77,54 +73,21 @@ class OldAutoencoder(BaseSR):
     def __init__(self,
                  n_in: int,
                  n_out: int,
-                 latent_dim: int) -> None:
+                 latent_dim: int,
+                 n_hidden=256,
+                 activation=nn.ELU) -> None:
         super().__init__()
 
         # Saving hyperparameters of autoencoder
         self.save_hyperparameters()
 
-        self.encoder = Encoder(n_in, latent_dim)
-        self.decoder = Decoder(n_out, latent_dim)
+        self.encoder = Encoder(n_in, latent_dim, n_hidden, activation)
+        self.decoder = Decoder(n_out, latent_dim, n_hidden, activation)
 
     def forward(self, x: Tensor) -> Tensor:
         z = self.encoder(x)
         x_hat = self.decoder(z)
         return x_hat
-
-    def configure_optimizers(self) -> Any:
-        optimizer = optim.Adam(self.parameters(), lr=1e-3)
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-                        optimizer,
-                        mode="min",
-                        factor=0.2,
-                        patience=20,
-                        min_lr=5e-5)
-        out = {"optimizer": optimizer,
-               "lr_scheduler": scheduler,
-               "monitor": "val_loss"}
-        return out
-
-    def training_step(self, batch, batch_idx) -> Tensor:
-        loss =  self._loss(batch)
-        loss += self._l2_regularization()
-        self.log("train_loss", loss)
-        return loss
-
-    def validation_step(self, batch, batch_idx) -> None:
-        loss = self._loss(batch)
-        self.log("val_loss", loss)
-
-    def test_step(self, batch, batch_idx) -> None:
-        loss = self._loss(batch)
-        self.log("test_loss", loss)
-
-    def _l2_regularization(self, reg_strength=0.001):
-        out = sum(torch.square(p).sum() for p in self.parameters())
-        return reg_strength * out
-
-    def _l1_regularization(self, reg_strength=0.001):
-        out = sum(torch.abs(p).sum() for p in self.parameters())
-        return reg_strength * out
 
     def _loss(self, batch):
         x = batch

@@ -6,7 +6,7 @@ from abc import abstractmethod
 
 
 class Residual(nn.Module):
-    def __init__(self, features: int, activation = nn.ELU) -> None:
+    def __init__(self, features: int, activation=nn.ELU) -> None:
         super().__init__()
         self.res = nn.Sequential(
                 nn.Linear(features, features),
@@ -53,6 +53,12 @@ class BaseSR(pl.LightningModule):
         self.log("test_loss", loss)
 
     def _l2_regularization(self, reg_strength=0.001):
+        """
+        Computes the L2 regularization term to be added to the loss
+
+        Args:
+            reg_strength (float, optional): Defaults to 0.005.
+        """
         out = sum(torch.square(p).sum() for p in self.parameters())
         return reg_strength * out
 
