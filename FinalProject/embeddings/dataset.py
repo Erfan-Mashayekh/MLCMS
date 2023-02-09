@@ -52,3 +52,12 @@ class Dataset:
         ax = fig.add_subplot(1, 1, 1, projection="3d")
         ax.scatter(*positions.T, c=positions_color, cmap=plt.cm.Spectral, s=0.5)
         ax.set_title("Swiss roll: sampled manifold point cloud")
+
+
+def generate_word2vec_dataset(nr_samples):
+    import gensim.downloader
+    google_news_vecs = gensim.downloader.load("word2vec-google-news-300")
+    vecs = google_news_vecs.vectors
+    idx = np.random.permutation(vecs.shape[0])[0:nr_samples]
+
+    return vecs, idx
