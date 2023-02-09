@@ -41,7 +41,7 @@ class Dataset:
         Task: part2
         """
 
-        return make_swiss_roll(self.nr_samples)
+        return make_swiss_roll(self.nr_samples, noise=0.5)
 
     def plot_swiss_roll(self, positions, positions_color):
         """
